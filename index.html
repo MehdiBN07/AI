@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html id="html-tag" lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>MIRAGE AI</title>
+    <style>
+        :root { --neon: #39ff14; --bg: #050505; --glass: rgba(10, 10, 10, 0.98); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { height: 100%; margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: sans-serif; overflow: hidden; }
+        
+        .main-shell { display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 850px; margin: 0 auto; position: relative; }
+        
+        header { 
+            height: 55px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; 
+            background: #000; border-bottom: 1px solid rgba(57, 255, 20, 0.1); z-index: 10; flex-shrink: 0; 
+        }
+
+        #chat-display { 
+            flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; 
+            gap: 12px; padding-bottom: 130px; -webkit-overflow-scrolling: touch; 
+        }
+
+        /* نظام التنبيهات الداخلي (Popup) */
+        #mirage-toast {
+            position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9); border: 1px solid var(--neon); color: #fff;
+            padding: 15px 25px; border-radius: 12px; z-index: 1000; font-size: 13px;
+            text-align: center; box-shadow: 0 0 20px rgba(57, 255, 20, 0.2);
+            opacity: 0; visibility: hidden; transition: 0.3s; pointer-events: none;
+            max-width: 80%; line-height: 1.4;
+        }
+        #mirage-toast.show { opacity: 1; visibility: visible; top: 25%; }
+
+        .bottom-fixed-area { position: absolute; bottom: 0; left: 0; width: 100%; background: #000; z-index: 20; padding-bottom: env(safe-area-inset-bottom); }
+        
+        .copyright-bar { font-size: 8px; font-weight: 200; text-align: center; color: rgba(255, 255, 255, 0.2); padding: 4px 0; }
+        .copyright-bar a { color: rgba(57, 255, 20, 0.3); text-decoration: none; }
+
+        .console-container { padding: 8px 12px 12px 12px; }
+        .input-wrapper { display: flex; align-items: center; gap: 10px; background: #111; padding: 4px 12px; border-radius: 25px; border: 1px solid #222; }
+        input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; padding: 10px 0; outline: none; font-size: 16px; }
+        
+        .mem-toggle { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: 0.3s; cursor: pointer; }
+        .mem-toggle.active { border-color: var(--neon); background: rgba(57, 255, 20, 0.1); box-shadow: 0 0 8px var(--neon); }
+        #send-btn { background: var(--neon); color: #000; border-radius: 50%; width: 36px; height: 36px; border: none; font-weight: bold; cursor: pointer; }
+
+        .bubble { padding: 12px 16px; border-radius: 18px; max-width: 85%; font-size: 14px; line-height: 1.5; word-wrap: break-word; }
+        .ai-msg { background: rgba(255,255,255,0.04); align-self: flex-start; border: 1px solid rgba(255,255,255,0.05); }
+        .user-msg { background: rgba(57, 255, 20, 0.1); border: 1px solid var(--neon); align-self: flex-end; }
+    </style>
+</head>
+<body>
+
+<div id="mirage-toast"></div>
+
+<div class="main-shell">
+    <header>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <a href="https://mehdibn07.github.io/THE-GAMEHUB/" style="text-decoration:none; font-size:1.4rem;">🏠</a>
+            <h1 style="color: var(--neon); font-size: 1.1rem; margin: 0;">MIRAGE AI</h1>
+        </div>
+        <select id="langSelect" onchange="changeLang(this.value)" style="background:#000; color:var(--neon); border:1px solid #333; font-size:11px; border-radius:5px;">
+            <option value="ar">العربية</option>
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+        </select>
+    </header>
+
+    <div id="chat-display"></div>
+
+    <div class="bottom-fixed-area">
+        <div class="copyright-bar">
+            جميع الحقوق محفوظة لدى <a href="https://mehdibn07.github.io/THE-GAMEHUB/">THE_GAMEHUB</a> © 2026
+        </div>
+        <div class="console-container">
+            <div class="input-wrapper">
+                <div id="memBtn" class="mem-toggle" onclick="toggleMemory()">🧠</div>
+                <input type="text" id="queryInput" placeholder="اكتب..." autocomplete="off">
+                <button id="send-btn" onclick="handleSend()">></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let memory = [];
+
+    window.onload = () => {
+        const savedLang = localStorage.getItem('mirage_lang') || 'ar';
+        document.getElementById('langSelect').value = savedLang;
+        changeLang(savedLang);
+        
+        if(localStorage.getItem('mirage_mem_on') === 'true') {
+            document.getElementById('memBtn').classList.add('active');
+            memory = JSON.parse(localStorage.getItem('mirage_history') || '[]');
+            renderChat();
+            showPopup("تم استعادة المحادثات من ذاكرة الهاتف 🧠");
+        } else {
+            addBubble('ai-msg', "مرحباً بك في MIRAGE AI. ⚠️ يجب تفعيل أيقونة المخ (🧠) لحفظ المحادثات في هاتفك. عند إطفائها تُحذف البيانات نهائياً.");
+        }
+    };
+
+    function showPopup(text) {
+        const toast = document.getElementById('mirage-toast');
+        toast.innerText = text;
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 3500);
+    }
+
+    function renderChat() {
+        const display = document.getElementById('chat-display');
+        display.innerHTML = '';
+        memory.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = `bubble ${msg.type}`;
+            div.innerText = msg.text;
+            display.appendChild(div);
+        });
+        display.scrollTop = display.scrollHeight;
+    }
+
+    async function handleSend() {
+        const input = document.getElementById('queryInput');
+        const query = input.value.trim();
+        if (!query) return;
+
+        memory.push({type: 'user-msg', text: query});
+        input.value = '';
+        renderChat();
+
+        const loadingDiv = addBubble('ai-msg', "...");
+
+        try {
+            const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(query)}?model=openai`);
+            const text = await res.text();
+            loadingDiv.innerText = text.trim();
+            memory.push({type: 'ai-msg', text: loadingDiv.innerText});
+            saveToLocal();
+        } catch (e) { loadingDiv.innerText = "Error"; }
+        document.getElementById('chat-display').scrollTop = document.getElementById('chat-display').scrollHeight;
+    }
+
+    function toggleMemory() {
+        const btn = document.getElementById('memBtn');
+        const isActive = btn.classList.toggle('active');
+        localStorage.setItem('mirage_mem_on', isActive);
+        if(isActive) {
+            showPopup("تم تفعيل الذاكرة: سيتم حفظ الرسائل في هاتفك فقط 📱");
+        } else {
+            localStorage.removeItem('mirage_history');
+            memory = [];
+            renderChat();
+            showPopup("تم مسح الذاكرة وتدمير البيانات نهائياً 🗑️");
+        }
+    }
+
+    function saveToLocal() { if(localStorage.getItem('mirage_mem_on') === 'true') localStorage.setItem('mirage_history', JSON.stringify(memory.slice(-20))); }
+
+    function addBubble(cls, txt) {
+        const div = document.createElement('div');
+        div.className = `bubble ${cls}`;
+        div.innerText = txt;
+        document.getElementById('chat-display').appendChild(div);
+        document.getElementById('chat-display').scrollTop = document.getElementById('chat-display').scrollHeight;
+        return div;
+    }
+
+    function changeLang(l) { 
+        document.getElementById('html-tag').dir = (l === 'ar' ? 'rtl' : 'ltr'); 
+        localStorage.setItem('mirage_lang', l); 
+    }
+    document.getElementById('queryInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') handleSend(); });
+</script>
+</body>
+</html>
