@@ -3,17 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MIRAGE AI</title>
+    <title>MIRAGE AI | ORBIT SYSTEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Tajawal:wght@200;400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #39ff14; --bg: #050505; --glass: rgba(10, 10, 10, 0.98); }
+        /* تعريف الألوان والتأثيرات الجديدة */
+        :root { 
+            --neon-blue: #00d2ff; /* الأزرق النيون الأساسي */
+            --led-glow: #008fcc; /* الأزرق النيون للإضاءة LED */
+            --bg-dark: #02040a; /* الأسود الداكن */
+            --glass: rgba(10, 10, 10, 0.98); 
+        }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { height: 100%; margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: sans-serif; overflow: hidden; }
+        body, html { height: 100%; margin: 0; padding: 0; background: var(--bg-dark); color: #fff; font-family: 'Tajawal', sans-serif; overflow: hidden; }
         
         .main-shell { display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 850px; margin: 0 auto; position: relative; }
         
+        /* تأثيرات LED على رأس الصفحة */
         header { 
-            height: 55px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; 
-            background: #000; border-bottom: 1px solid rgba(57, 255, 20, 0.1); z-index: 10; flex-shrink: 0; 
+            height: 60px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(0,0,0,0.8); border-bottom: 2px solid var(--neon-blue); z-index: 10; flex-shrink: 0; 
+            box-shadow: 0 0 15px var(--led-glow); /* إضاءة LED سفلية */
+            backdrop-filter: blur(10px);
         }
 
         #chat-display { 
@@ -21,12 +31,12 @@
             gap: 12px; padding-bottom: 130px; -webkit-overflow-scrolling: touch; 
         }
 
-        /* نظام التنبيهات الداخلي (Popup) */
+        /* تنبيهات LED احترافية */
         #mirage-toast {
             position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9); border: 1px solid var(--neon); color: #fff;
+            background: rgba(0, 0, 0, 0.9); border: 2px solid var(--neon-blue); color: #fff;
             padding: 15px 25px; border-radius: 12px; z-index: 1000; font-size: 13px;
-            text-align: center; box-shadow: 0 0 20px rgba(57, 255, 20, 0.2);
+            text-align: center; box-shadow: 0 0 30px var(--led-glow); /* إضاءة LED قوية قوية */
             opacity: 0; visibility: hidden; transition: 0.3s; pointer-events: none;
             max-width: 80%; line-height: 1.4;
         }
@@ -34,20 +44,35 @@
 
         .bottom-fixed-area { position: absolute; bottom: 0; left: 0; width: 100%; background: #000; z-index: 20; padding-bottom: env(safe-area-inset-bottom); }
         
-        .copyright-bar { font-size: 8px; font-weight: 200; text-align: center; color: rgba(255, 255, 255, 0.2); padding: 4px 0; }
-        .copyright-bar a { color: rgba(57, 255, 20, 0.3); text-decoration: none; }
+        /* تحديث نص الحقوق */
+        .copyright-bar { font-size: 9px; font-weight: 200; text-align: center; color: rgba(255, 255, 255, 0.2); padding: 6px 0; letter-spacing: 1px; }
+        .copyright-bar a { color: var(--neon-blue); text-decoration: none; text-shadow: 0 0 5px var(--led-glow); }
 
         .console-container { padding: 8px 12px 12px 12px; }
-        .input-wrapper { display: flex; align-items: center; gap: 10px; background: #111; padding: 4px 12px; border-radius: 25px; border: 1px solid #222; }
-        input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; padding: 10px 0; outline: none; font-size: 16px; }
         
-        .mem-toggle { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: 0.3s; cursor: pointer; }
-        .mem-toggle.active { border-color: var(--neon); background: rgba(57, 255, 20, 0.1); box-shadow: 0 0 8px var(--neon); }
-        #send-btn { background: var(--neon); color: #000; border-radius: 50%; width: 36px; height: 36px; border: none; font-weight: bold; cursor: pointer; }
+        /* تأثير LED على حقل الإدخال */
+        .input-wrapper { display: flex; align-items: center; gap: 10px; background: #0a0a0a; padding: 6px 14px; border-radius: 25px; border: 1px solid rgba(0, 210, 255, 0.3); box-shadow: 0 0 10px rgba(0, 210, 255, 0.1); }
+        input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; padding: 10px 0; outline: none; font-size: 16px; font-family: 'Tajawal', sans-serif; }
+        
+        /* تعديل أيقونة الذاكرة */
+        .mem-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #222; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.3s; cursor: pointer; }
+        .mem-toggle.active { border-color: var(--neon-blue); background: rgba(0, 210, 255, 0.1); box-shadow: 0 0 15px var(--led-glow); text-shadow: 0 0 5px var(--led-glow); }
+        
+        /* تعديل أيقونة الإرسال LED */
+        #send-btn { 
+            background: linear-gradient(45deg, var(--neon-blue), var(--led-glow)); 
+            color: #000; border-radius: 50%; width: 38px; height: 38px; border: none; 
+            font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 0 10px var(--led-glow);
+        }
 
         .bubble { padding: 12px 16px; border-radius: 18px; max-width: 85%; font-size: 14px; line-height: 1.5; word-wrap: break-word; }
-        .ai-msg { background: rgba(255,255,255,0.04); align-self: flex-start; border: 1px solid rgba(255,255,255,0.05); }
-        .user-msg { background: rgba(57, 255, 20, 0.1); border: 1px solid var(--neon); align-self: flex-end; }
+        
+        /* تصميم رسالة AI LED */
+        .ai-msg { background: rgba(0, 210, 255, 0.02); align-self: flex-start; border: 1px solid rgba(0, 210, 255, 0.05); }
+        
+        /* تصميم رسالة المستخدم LED */
+        .user-msg { background: rgba(0, 210, 255, 0.08); border: 2px solid var(--neon-blue); align-self: flex-end; box-shadow: 0 0 10px var(--led-glow); }
     </style>
 </head>
 <body>
@@ -57,10 +82,10 @@
 <div class="main-shell">
     <header>
         <div style="display: flex; align-items: center; gap: 10px;">
-            <a href="https://mehdibn07.github.io/ORBIT/" style="text-decoration:none; font-size:1.4rem;">🏠</a>
-            <h1 style="color: var(--neon); font-size: 1.1rem; margin: 0;">MIRAGE AI</h1>
+            <a href="https://mehdibn07.github.io/ORBIT/" style="text-decoration:none; font-size:1.4rem; color: var(--neon-blue); text-shadow: 0 0 10px var(--led-glow);">🛸</a>
+            <h1 style="color: var(--neon-blue); font-size: 1.2rem; margin: 0; font-family: 'Orbitron', sans-serif; letter-spacing: 3px; font-weight: 900; text-shadow: 0 0 15px var(--led-glow);">MIRAGE AI</h1>
         </div>
-        <select id="langSelect" onchange="changeLang(this.value)" style="background:#000; color:var(--neon); border:1px solid #333; font-size:11px; border-radius:5px;">
+        <select id="langSelect" onchange="changeLang(this.value)" style="background:#111; color:var(--neon-blue); border:1px solid #333; font-size:11px; border-radius:5px; padding: 4px; font-family: 'Tajawal', sans-serif;">
             <option value="ar">العربية</option>
             <option value="en">English</option>
             <option value="fr">Français</option>
@@ -71,13 +96,13 @@
 
     <div class="bottom-fixed-area">
         <div class="copyright-bar">
-            جميع الحقوق محفوظة لدى <a href="https://mehdibn07.github.io/THE-GAMEHUB/">THE_GAMEHUB</a> © 2026
+            جميع الحقوق محفوظة لدى <a href="https://mehdibn07.github.io/ORBIT/">ORBIT SYSTEM</a> © 2026
         </div>
         <div class="console-container">
             <div class="input-wrapper">
-                <div id="memBtn" class="mem-toggle" onclick="toggleMemory()">🧠</div>
-                <input type="text" id="queryInput" placeholder="اكتب..." autocomplete="off">
-                <button id="send-btn" onclick="handleSend()">></button>
+                <div id="memBtn" class="mem-toggle" onclick="toggleMemory()" style="color: #666;">🧠</div>
+                <input type="text" id="queryInput" placeholder="اكتب أمراً للمدار..." autocomplete="off">
+                <button id="send-btn" onclick="handleSend()">⚡</button>
             </div>
         </div>
     </div>
@@ -95,9 +120,9 @@
             document.getElementById('memBtn').classList.add('active');
             memory = JSON.parse(localStorage.getItem('mirage_history') || '[]');
             renderChat();
-            showPopup("تم استعادة المحادثات من ذاكرة الهاتف 🧠");
+            showPopup("تمت مزامنة بيانات المدار 📡");
         } else {
-            addBubble('ai-msg', "مرحباً بك في MIRAGE AI. ⚠️ يجب تفعيل أيقونة المخ (🧠) لحفظ المحادثات في هاتفك. عند إطفائها تُحذف البيانات نهائياً.");
+            addBubble('ai-msg', "مرحباً بك في MIRAGE AI. قم بتفعيل (🧠) لحفظ سجل المحادثات محلياً.");
         }
     };
 
@@ -129,7 +154,7 @@
         input.value = '';
         renderChat();
 
-        const loadingDiv = addBubble('ai-msg', "...");
+        const loadingDiv = addBubble('ai-msg', "جاري المعالجة...");
 
         try {
             const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(query)}?model=openai`);
@@ -137,7 +162,7 @@
             loadingDiv.innerText = text.trim();
             memory.push({type: 'ai-msg', text: loadingDiv.innerText});
             saveToLocal();
-        } catch (e) { loadingDiv.innerText = "Error"; }
+        } catch (e) { loadingDiv.innerText = "فشل الاتصال بالمدار الرقمي."; }
         document.getElementById('chat-display').scrollTop = document.getElementById('chat-display').scrollHeight;
     }
 
@@ -146,12 +171,14 @@
         const isActive = btn.classList.toggle('active');
         localStorage.setItem('mirage_mem_on', isActive);
         if(isActive) {
-            showPopup("تم تفعيل الذاكرة: سيتم حفظ الرسائل في هاتفك فقط 📱");
+            btn.style.color = 'var(--neon-blue)';
+            showPopup("الذاكرة نشطة: سيتم الحفظ محلياً 📱");
         } else {
+            btn.style.color = '#666';
             localStorage.removeItem('mirage_history');
             memory = [];
             renderChat();
-            showPopup("تم مسح الذاكرة وتدمير البيانات نهائياً 🗑️");
+            showPopup("تم تدمير السجلات بنجاح 🗑️");
         }
     }
 
