@@ -33,8 +33,8 @@
 
         .sidebar-header { padding: 15px; border-bottom: 1px solid var(--glass-border); display: flex; flex-direction: column; gap: 10px; }
         
-        /* حاوية عناصر التحكم للهواتف داخل السايدبار (تظهر في الموبايل فقط) */
-        .mobile-controls-container { display: none; flex-direction: column; gap: 10px; padding-bottom: 5px; border-bottom: 1px solid rgba(0, 210, 255, 0.1); }
+        /* حاوية عناصر التحكم للهواتف داخل السايدبار */
+        .mobile-controls-container { display: none; flex-direction: column; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(0, 210, 255, 0.1); }
 
         .new-chat-btn { width: 100%; background: transparent; color: var(--neon-blue); border: 1px dashed var(--neon-blue); padding: 12px; border-radius: 8px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-weight: bold; transition: 0.3s; }
         .new-chat-btn:hover { background: rgba(0, 210, 255, 0.1); box-shadow: 0 0 10px var(--led-glow); }
@@ -57,7 +57,38 @@
 
         .header-controls { display: flex; align-items: center; gap: 12px; }
         
-        #auth-container { display: flex; align-items: center; justify-content: center; min-height: 36px; }
+        #auth-container { display: flex; align-items: center; justify-content: center; }
+
+        /* 🆕 تصميم زر تسجيل الدخول المخصص باللوجو الجديد والشعاع */
+        .custom-login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(0, 210, 255, 0.03);
+            border: 1px solid var(--neon-blue);
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.1);
+        }
+        .custom-login-btn:hover {
+            background: rgba(0, 210, 255, 0.15);
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+        .custom-login-btn img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+        .custom-login-btn span {
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            font-family: 'Tajawal', sans-serif;
+            white-space: nowrap;
+        }
 
         .user-profile { display: flex; align-items: center; gap: 8px; background: rgba(0, 210, 255, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--neon-blue); box-shadow: 0 0 10px rgba(0, 210, 255, 0.2); }
         .user-avatar { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--neon-blue); }
@@ -105,22 +136,13 @@
         #mirage-toast { position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.95); border: 2px solid var(--neon-blue); color: #fff; padding: 15px 25px; border-radius: 15px; z-index: 1000; font-size: 13px; text-align: center; box-shadow: 0 0 30px var(--led-glow); opacity: 0; visibility: hidden; transition: 0.4s; pointer-events: none; max-width: 85%; }
         #mirage-toast.show { opacity: 1; visibility: visible; }
 
-        /* ======================================================== */
-        /* 📱 قواعد التصميم المتجاوب الخاصة بالهواتف (قواعد الـ Media Query) */
-        /* ======================================================== */
+        /* استعلامات الهواتف */
         @media (max-width: 768px) {
-            /* 1. إخفاء عناصر التحكم من الهيدر لمنع التداخل */
             header .header-controls { display: none; }
-            
-            /* 2. إظهار حاوية التحكم الاحتياطية داخل القائمة الجانبية (Sidebar) */
             .mobile-controls-container { display: flex; }
-
-            /* 3. تعديل حجم الخط والفقاعات ليناسب شاشات اللمس الصغيرة */
             .bubble { max-width: 90%; font-size: 13.5px; padding: 10px 14px; }
             .user-msg-container { max-width: 92%; }
             #chat-display { padding: 10px; padding-bottom: 130px; }
-
-            /* 4. تحسين شريط الإدخال السفلي لعدم الخروج عن أبعاد شاشة الموبايل */
             .console-container { padding: 5px 10px 15px 10px; }
             .input-wrapper { padding: 4px 12px; gap: 8px; }
             input[type="text"] { font-size: 14px; }
@@ -158,7 +180,7 @@
             </div>
             
             <div class="header-controls">
-                <div id="auth-container"><div id="google-btn"></div></div>
+                <div id="auth-container"></div>
                 <select id="langSelect" onchange="changeLang(this.value)" style="background:#111; color:var(--neon-blue); border:1px solid #333; font-size:11px; border-radius:8px; padding: 5px; cursor: pointer;">
                     <option value="ar">العربية</option>
                     <option value="en">English</option>
@@ -184,14 +206,16 @@
 <script>
     const GOOGLE_CLIENT_ID = "86451093308-m5t74arb2v706v50qbls4pfoc4q4b0v1.apps.googleusercontent.com";
     const CLOUD_STORAGE_API = "https://kvbin.org/api/v1/bins/"; 
+    // 🆕 رابط الشعار الجديد المرفق من قبلك لتسجيل الدخول
+    const CUSTOM_LOGO_URL = "https://share.google/aK0AuZuuMEborY721";
 
     let allSessions = {}; 
     let currentSessionId = ""; 
     let currentUser = null;
 
     const translations = {
-        ar: { btnNewChat: "+ محادثة جديدة", defaultChatTitle: "محادثة فارغة 🛸", placeholder: "أرسل رسالة للمدار...", waiting: "جاري الإجابة...", welcome: "وضع الحفظ المحلي نشط تلقائياً 💾. اضغط على الـ 🧠 لتفعيل السحاب المزامَن.", cancel: "إلغاء", save: "حفظ" },
-        en: { btnNewChat: "+ New Chat", defaultChatTitle: "Empty Orbit 🛸", placeholder: "Message Orbit...", waiting: "Answering...", welcome: "Local save mode is active 💾. Click 🧠 to enable synced Cloud Storage.", cancel: "Cancel", save: "Save" }
+        ar: { btnNewChat: "+ محادثة جديدة", defaultChatTitle: "محادثة فارغة 🛸", placeholder: "أرسل رسالة للمدار...", waiting: "جاري الإجابة...", welcome: "وضع الحفظ المحلي نشط تلقائياً 💾. اضغط على الـ 🧠 لتفعيل السحاب المزامَن.", cancel: "إلغاء", save: "حفظ", loginText: "تسجيل الدخول بجوجل" },
+        en: { btnNewChat: "+ New Chat", defaultChatTitle: "Empty Orbit 🛸", placeholder: "Message Orbit...", waiting: "Answering...", welcome: "Local save mode is active 💾. Click 🧠 to enable synced Cloud Storage.", cancel: "Cancel", save: "Save", loginText: "Sign in with Google" }
     };
 
     marked.setOptions({ gfm: true, breaks: true });
@@ -209,6 +233,7 @@
             fetchCloudSessions(); 
         } else {
             initGoogleSignIn();
+            updateAuthUI();
             loadLocalSessions(); 
         }
     };
@@ -448,30 +473,19 @@
         } catch (e) { loadingDiv.innerText = "خطأ."; }
     }
 
-    // تهيئة وتوليد الأزرار في الواجهتين (الموبايل والحاسوب) لضمان العمل دائماً
+    // تهيئة نظام مصادقة جوجل القياسي خلف الكواليس لربطه بالزر المخصص الجديد
     function initGoogleSignIn() {
         if (typeof google === 'undefined') return;
-        
         google.accounts.id.initialize({ 
             client_id: GOOGLE_CLIENT_ID, 
             callback: handleCredentialResponse 
         });
-        
-        // زر الحاسوب في الهيدر العلوي
-        const desktopBtn = document.getElementById("google-btn");
-        if(desktopBtn) {
-            google.accounts.id.renderButton(desktopBtn, { 
-                theme: "filled_blue", size: "medium", shape: "pill", text: "signin_with" 
-            });
-        }
+    }
 
-        // إنشاء وتوليد حاوية زر إضافية للموبايل لتعمل داخل السايدبار بسلاسة
-        const mobileWrapper = document.getElementById("mobile-auth-wrapper");
-        if(mobileWrapper) {
-            mobileWrapper.innerHTML = '<div id="google-btn-mobile"></div>';
-            google.accounts.id.renderButton(document.getElementById("google-btn-mobile"), { 
-                theme: "filled_blue", size: "large", shape: "pill", text: "signin_with", width: 250
-            });
+    // تشغيل نافذة جوجل المنبثقة الرسمية عند النقر على الزر المخصص
+    function triggerGoogleAuth() {
+        if (typeof google !== 'undefined') {
+            google.accounts.id.prompt();
         }
     }
 
@@ -488,6 +502,7 @@
     function updateAuthUI() {
         const desktopContainer = document.getElementById('auth-container');
         const mobileWrapper = document.getElementById('mobile-auth-wrapper');
+        const lang = localStorage.getItem('mirage_lang') || 'ar';
         
         if (currentUser) {
             const profileHTML = `
@@ -500,8 +515,15 @@
             if(desktopContainer) desktopContainer.innerHTML = profileHTML;
             if(mobileWrapper) mobileWrapper.innerHTML = profileHTML;
         } else {
-            if(desktopContainer) desktopContainer.innerHTML = `<div id="google-btn"></div>`;
-            initGoogleSignIn();
+            // 🆕 بناء الأزرار المخصصة مع شعارك الجديد المضيء للكمبيوتر واللاب توب والموبايل
+            const customLoginHTML = `
+                <div class="custom-login-btn" onclick="triggerGoogleAuth()">
+                    <img src="${CUSTOM_LOGO_URL}" alt="Google Logo">
+                    <span>${translations[lang].loginText}</span>
+                </div>
+            `;
+            if(desktopContainer) desktopContainer.innerHTML = customLoginHTML;
+            if(mobileWrapper) mobileWrapper.innerHTML = customLoginHTML;
         }
     }
 
@@ -534,6 +556,9 @@
         document.getElementById('mobileLangSelect').value = l;
         document.getElementById('newChatBtn').innerText = translations[l].btnNewChat;
         document.getElementById('queryInput').placeholder = translations[l].placeholder;
+        
+        // تحديث نصوص الأزرار المخصصة عند تبديل اللغة بدون كسر الهوية
+        updateAuthUI();
         renderSidebarList();
         if(updateWelcome) renderChat();
     }
