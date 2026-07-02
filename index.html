@@ -14,7 +14,7 @@
             --led-glow: #008fcc; 
             --bg-dark: #02040a; 
             --glass-border: rgba(0, 210, 255, 0.2);
-            --sidebar-width: 260px;
+            --sidebar-width: 280px;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none !important; }
@@ -22,6 +22,7 @@
 
         .app-container { display: flex; height: 100%; width: 100%; position: relative; }
 
+        /* القائمة الجانبية */
         .sidebar {
             width: var(--sidebar-width); background: #040814; border-left: 1px solid var(--glass-border);
             display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 30;
@@ -30,7 +31,11 @@
         html[dir="ltr"] .sidebar { border-left: none; border-right: 1px solid var(--glass-border); right: auto; left: 0; transform: translateX(-100%); }
         .app-container.sidebar-open .sidebar { transform: translateX(0); box-shadow: 0 0 30px rgba(0, 210, 255, 0.2); }
 
-        .sidebar-header { padding: 15px; border-bottom: 1px solid var(--glass-border); }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid var(--glass-border); display: flex; flex-direction: column; gap: 10px; }
+        
+        /* حاوية عناصر التحكم للهواتف داخل السايدبار (تظهر في الموبايل فقط) */
+        .mobile-controls-container { display: none; flex-direction: column; gap: 10px; padding-bottom: 5px; border-bottom: 1px solid rgba(0, 210, 255, 0.1); }
+
         .new-chat-btn { width: 100%; background: transparent; color: var(--neon-blue); border: 1px dashed var(--neon-blue); padding: 12px; border-radius: 8px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-weight: bold; transition: 0.3s; }
         .new-chat-btn:hover { background: rgba(0, 210, 255, 0.1); box-shadow: 0 0 10px var(--led-glow); }
 
@@ -44,6 +49,7 @@
 
         .delete-chat-btn { background: transparent; border: none; color: #ff4a4a; cursor: pointer; font-size: 13px; padding: 8px; opacity: 0.7; transition: 0.2s; }
         
+        /* الهيكل الأساسي للمحادثة */
         .main-shell { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; background: var(--bg-dark); }
         header { height: 60px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--neon-blue); z-index: 10; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3); backdrop-filter: blur(15px); }
 
@@ -51,13 +57,7 @@
 
         .header-controls { display: flex; align-items: center; gap: 12px; }
         
-        /* ضبط حاوية زر جوجل الخارجي لمنع أي تداخل للأشكال */
-        #auth-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 36px;
-        }
+        #auth-container { display: flex; align-items: center; justify-content: center; min-height: 36px; }
 
         .user-profile { display: flex; align-items: center; gap: 8px; background: rgba(0, 210, 255, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--neon-blue); box-shadow: 0 0 10px rgba(0, 210, 255, 0.2); }
         .user-avatar { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--neon-blue); }
@@ -65,35 +65,17 @@
 
         #chat-display { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 14px; padding-bottom: 140px; }
 
+        /* الفقاعات */
         .bubble { padding: 12px 18px; border-radius: 20px; max-width: 80%; font-size: 14.5px; line-height: 1.6; word-wrap: break-word; }
         .ai-msg { background: rgba(255, 255, 255, 0.03); align-self: flex-start; border: 1px solid rgba(0, 210, 255, 0.1); }
         
-        /* إصلاح تداخل وعرض حاوية رسائل المستخدم وزر التعديل */
-        .user-msg-container { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            align-self: flex-end; 
-            max-width: 85%;
-            width: auto;
-        }
+        .user-msg-container { display: flex; align-items: center; gap: 10px; align-self: flex-end; max-width: 85%; width: auto; }
         .user-msg { background: rgba(0, 210, 255, 0.1); border: 1px solid var(--neon-blue); max-width: 100%; }
         
-        /* إصلاح مظهر زر القلم ليكون دائرياً مستقلاً تماماً وبدون تداخل */
         .edit-msg-btn { 
-            background: rgba(255, 255, 255, 0.05); 
-            border: 1px solid rgba(0, 210, 255, 0.2); 
-            color: rgba(255,255,255,0.8); 
-            cursor: pointer; 
-            font-size: 13px; 
-            width: 32px; 
-            height: 32px; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            transition: 0.2s; 
-            flex-shrink: 0; /* يمنع انضغاط الزر نهائياً */
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.2); color: rgba(255,255,255,0.8); 
+            cursor: pointer; font-size: 13px; width: 32px; height: 32px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0; 
         }
         .edit-msg-btn:hover { background: var(--neon-blue); color: #000; border-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
 
@@ -107,6 +89,7 @@
         .sidebar-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 25; display: none; }
         .app-container.sidebar-open .sidebar-overlay { display: block; }
 
+        /* منطقة الإدخال السفلية */
         .bottom-fixed-area { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, #000 80%, transparent); z-index: 20; padding-bottom: env(safe-area-inset-bottom); }
         .copyright-bar { font-size: 9px; text-align: center; color: rgba(255, 255, 255, 0.3); padding: 8px 0; }
         .console-container { padding: 10px 15px 20px 15px; }
@@ -121,6 +104,29 @@
 
         #mirage-toast { position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.95); border: 2px solid var(--neon-blue); color: #fff; padding: 15px 25px; border-radius: 15px; z-index: 1000; font-size: 13px; text-align: center; box-shadow: 0 0 30px var(--led-glow); opacity: 0; visibility: hidden; transition: 0.4s; pointer-events: none; max-width: 85%; }
         #mirage-toast.show { opacity: 1; visibility: visible; }
+
+        /* ======================================================== */
+        /* 📱 قواعد التصميم المتجاوب الخاصة بالهواتف (قواعد الـ Media Query) */
+        /* ======================================================== */
+        @media (max-width: 768px) {
+            /* 1. إخفاء عناصر التحكم من الهيدر لمنع التداخل */
+            header .header-controls { display: none; }
+            
+            /* 2. إظهار حاوية التحكم الاحتياطية داخل القائمة الجانبية (Sidebar) */
+            .mobile-controls-container { display: flex; }
+
+            /* 3. تعديل حجم الخط والفقاعات ليناسب شاشات اللمس الصغيرة */
+            .bubble { max-width: 90%; font-size: 13.5px; padding: 10px 14px; }
+            .user-msg-container { max-width: 92%; }
+            #chat-display { padding: 10px; padding-bottom: 130px; }
+
+            /* 4. تحسين شريط الإدخال السفلي لعدم الخروج عن أبعاد شاشة الموبايل */
+            .console-container { padding: 5px 10px 15px 10px; }
+            .input-wrapper { padding: 4px 12px; gap: 8px; }
+            input[type="text"] { font-size: 14px; }
+            #send-btn { width: 36px; height: 36px; font-size: 16px; }
+            .mem-toggle { width: 34px; height: 34px; font-size: 14px; }
+        }
     </style>
 </head>
 <body>
@@ -132,6 +138,13 @@
 
     <div class="sidebar">
         <div class="sidebar-header">
+            <div class="mobile-controls-container">
+                <div id="mobile-auth-wrapper"></div>
+                <select id="mobileLangSelect" onchange="changeLang(this.value)" style="background:#111; color:var(--neon-blue); border:1px solid #333; font-size:13px; border-radius:8px; padding: 8px; width:100%; cursor: pointer;">
+                    <option value="ar">العربية</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
             <button class="new-chat-btn" id="newChatBtn" onclick="startNewChat()">+ محادثة جديدة</button>
         </div>
         <div class="chat-list" id="sessions-container"></div>
@@ -186,6 +199,7 @@
     window.onload = () => {
         const savedLang = localStorage.getItem('mirage_lang') || 'ar';
         document.getElementById('langSelect').value = savedLang;
+        document.getElementById('mobileLangSelect').value = savedLang;
         changeLang(savedLang, false); 
         
         const savedUser = localStorage.getItem('mirage_user');
@@ -258,11 +272,8 @@
         if (currentUser) {
             showPopup("☁️ المزامنة السحابية التلقائية نشطة عبر حسابك ومؤمنة!");
         } else {
-            showPopup("🔐 يرجى تسجيل الدخول لحساب جوجل أولاً لتفعيل السحاب.");
-            const googleBtnEl = document.querySelector('#google-btn iframe');
-            if (googleBtnEl) {
-                showPopup("يرجى الضغط على زر تسجيل الدخول الظاهر في الأعلى 👆");
-            }
+            showPopup("🔐 يرجى فتح القائمة الجانبية وتوقيع الدخول لتفعيل السحاب المزامَن.");
+            toggleSidebar();
         }
     }
 
@@ -352,7 +363,6 @@
                     editBtn.innerHTML = '✏️';
                     editBtn.onclick = () => openEditMode(index, container);
 
-                    // ترتيب العناصر لحل مشكلة التداخل في كلا الاتجاهين
                     if (isRtl) {
                         container.appendChild(editBtn);
                         container.appendChild(bubble);
@@ -438,23 +448,31 @@
         } catch (e) { loadingDiv.innerText = "خطأ."; }
     }
 
-    // تهيئة زر جوجل القياسي لمنع تداخل اللوجو الأبيض الدائري بشكل ممتاز ومتجاوب
+    // تهيئة وتوليد الأزرار في الواجهتين (الموبايل والحاسوب) لضمان العمل دائماً
     function initGoogleSignIn() {
         if (typeof google === 'undefined') return;
+        
         google.accounts.id.initialize({ 
             client_id: GOOGLE_CLIENT_ID, 
             callback: handleCredentialResponse 
         });
         
-        google.accounts.id.renderButton(
-            document.getElementById("google-btn"), 
-            { 
-                theme: "filled_blue", 
-                size: "medium", 
-                shape: "pill",
-                text: "signin_with"
-            }
-        );
+        // زر الحاسوب في الهيدر العلوي
+        const desktopBtn = document.getElementById("google-btn");
+        if(desktopBtn) {
+            google.accounts.id.renderButton(desktopBtn, { 
+                theme: "filled_blue", size: "medium", shape: "pill", text: "signin_with" 
+            });
+        }
+
+        // إنشاء وتوليد حاوية زر إضافية للموبايل لتعمل داخل السايدبار بسلاسة
+        const mobileWrapper = document.getElementById("mobile-auth-wrapper");
+        if(mobileWrapper) {
+            mobileWrapper.innerHTML = '<div id="google-btn-mobile"></div>';
+            google.accounts.id.renderButton(document.getElementById("google-btn-mobile"), { 
+                theme: "filled_blue", size: "large", shape: "pill", text: "signin_with", width: 250
+            });
+        }
     }
 
     function handleCredentialResponse(response) {
@@ -468,17 +486,21 @@
     }
 
     function updateAuthUI() {
-        const container = document.getElementById('auth-container');
+        const desktopContainer = document.getElementById('auth-container');
+        const mobileWrapper = document.getElementById('mobile-auth-wrapper');
+        
         if (currentUser) {
-            container.innerHTML = `
+            const profileHTML = `
                 <div class="user-profile">
                     <img src="${currentUser.img}" class="user-avatar">
                     <span style="font-size:11px; font-weight:bold; color:var(--neon-blue); max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${currentUser.name}</span>
                     <button class="logout-btn" onclick="handleLogout()">🚪</button>
                 </div>
             `;
+            if(desktopContainer) desktopContainer.innerHTML = profileHTML;
+            if(mobileWrapper) mobileWrapper.innerHTML = profileHTML;
         } else {
-            container.innerHTML = `<div id="google-btn"></div>`;
+            if(desktopContainer) desktopContainer.innerHTML = `<div id="google-btn"></div>`;
             initGoogleSignIn();
         }
     }
@@ -508,6 +530,8 @@
     function changeLang(l, updateWelcome = true) { 
         document.getElementById('html-tag').dir = (l === 'ar' ? 'rtl' : 'ltr'); 
         localStorage.setItem('mirage_lang', l); 
+        document.getElementById('langSelect').value = l;
+        document.getElementById('mobileLangSelect').value = l;
         document.getElementById('newChatBtn').innerText = translations[l].btnNewChat;
         document.getElementById('queryInput').placeholder = translations[l].placeholder;
         renderSidebarList();
