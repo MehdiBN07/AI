@@ -17,187 +17,58 @@
             --sidebar-width: 260px;
         }
 
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            outline: none !important; 
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none !important; }
+        body, html { height: 100%; margin: 0; padding: 0; background: var(--bg-dark); color: #fff; font-family: 'Tajawal', sans-serif; overflow: hidden; }
 
-        body, html { 
-            height: 100%; margin: 0; padding: 0; 
-            background: var(--bg-dark); color: #fff; 
-            font-family: 'Tajawal', sans-serif; overflow: hidden; 
-        }
-
-        .app-container {
-            display: flex;
-            height: 100%;
-            width: 100%;
-            position: relative;
-        }
+        .app-container { display: flex; height: 100%; width: 100%; position: relative; }
 
         .sidebar {
-            width: var(--sidebar-width);
-            background: #040814;
-            border-left: 1px solid var(--glass-border);
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s ease;
-            z-index: 30;
-            position: absolute;
-            top: 0; bottom: 0; right: 0;
-            transform: translateX(100%);
+            width: var(--sidebar-width); background: #040814; border-left: 1px solid var(--glass-border);
+            display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 30;
+            position: absolute; top: 0; bottom: 0; right: 0; transform: translateX(100%);
         }
-        html[dir="ltr"] .sidebar {
-            border-left: none;
-            border-right: 1px solid var(--glass-border);
-            right: auto; left: 0;
-            transform: translateX(-100%);
-        }
+        html[dir="ltr"] .sidebar { border-left: none; border-right: 1px solid var(--glass-border); right: auto; left: 0; transform: translateX(-100%); }
+        .app-container.sidebar-open .sidebar { transform: translateX(0); box-shadow: 0 0 30px rgba(0, 210, 255, 0.2); }
 
-        .app-container.sidebar-open .sidebar {
-            transform: translateX(0);
-            box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
-        }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid var(--glass-border); }
+        .new-chat-btn { width: 100%; background: transparent; color: var(--neon-blue); border: 1px dashed var(--neon-blue); padding: 12px; border-radius: 8px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-weight: bold; transition: 0.3s; }
+        .new-chat-btn:hover { background: rgba(0, 210, 255, 0.1); box-shadow: 0 0 10px var(--led-glow); }
 
-        .sidebar-header {
-            padding: 15px;
-            border-bottom: 1px solid var(--glass-border);
-        }
+        .chat-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .chat-item-wrapper { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); border: 1px solid transparent; border-radius: 8px; padding: 4px 12px; transition: 0.2s; cursor: pointer; }
+        .chat-item-wrapper:hover, .chat-item-wrapper.active { background: rgba(0, 210, 255, 0.05); border-color: var(--glass-border); }
 
-        .new-chat-btn {
-            width: 100%;
-            background: transparent;
-            color: var(--neon-blue);
-            border: 1px dashed var(--neon-blue);
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Tajawal', sans-serif;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        .new-chat-btn:hover {
-            background: rgba(0, 210, 255, 0.1);
-            box-shadow: 0 0 10px var(--led-glow);
-        }
+        .chat-title-text { flex: 1; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; padding: 8px 0; }
+        html[dir="ltr"] .chat-title-text { text-align: left; }
+        .chat-item-wrapper.active .chat-title-text { color: var(--neon-blue); font-weight: bold; }
 
-        .chat-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .delete-chat-btn { background: transparent; border: none; color: #ff4a4a; cursor: pointer; font-size: 13px; padding: 8px; opacity: 0.7; transition: 0.2s; }
+        
+        .main-shell { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; background: var(--bg-dark); }
+        header { height: 60px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--neon-blue); z-index: 10; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3); backdrop-filter: blur(15px); }
 
-        .chat-item-wrapper {
+        .menu-toggle-btn { background: transparent; border: none; color: var(--neon-blue); font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 8px 12px; }
+
+        .header-controls { display: flex; align-items: center; gap: 12px; }
+        
+        /* ضبط حاوية زر جوجل الخارجي لمنع أي تداخل للأشكال */
+        #auth-container {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid transparent;
-            border-radius: 8px;
-            padding: 4px 12px;
-            transition: 0.2s;
-            cursor: pointer;
-        }
-        .chat-item-wrapper:hover, .chat-item-wrapper.active {
-            background: rgba(0, 210, 255, 0.05);
-            border-color: var(--glass-border);
+            justify-content: center;
+            min-height: 36px;
         }
 
-        .chat-title-text {
-            flex: 1;
-            font-size: 13.5px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-align: right;
-            padding: 8px 0;
-        }
-        html[dir="ltr"] .chat-title-text { text-align: left; }
-        .chat-item-wrapper.active .chat-title-text { color: var(--neon-blue); }
+        .user-profile { display: flex; align-items: center; gap: 8px; background: rgba(0, 210, 255, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--neon-blue); box-shadow: 0 0 10px rgba(0, 210, 255, 0.2); }
+        .user-avatar { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--neon-blue); }
+        .logout-btn { background: transparent; border: none; color: #ff4a4a; cursor: pointer; font-size: 13px; display: flex; align-items: center; }
 
-        .delete-chat-btn {
-            background: transparent; border: none; color: #ff4a4a; cursor: pointer;
-            font-size: 14px; padding: 8px; margin-right: 5px; opacity: 0.7; transition: 0.2s;
-        }
-        html[dir="ltr"] .delete-chat-btn { margin-right: 0; margin-left: 5px; }
-        
-        .main-shell { 
-            flex: 1; display: flex; flex-direction: column; height: 100%; 
-            position: relative; background: var(--bg-dark);
-        }
-        
-        header { 
-            height: 60px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; 
-            background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--neon-blue); z-index: 10; flex-shrink: 0; 
-            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3); backdrop-filter: blur(15px);
-        }
+        #chat-display { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 14px; padding-bottom: 140px; }
 
-        .menu-toggle-btn {
-            background: transparent; border: none; color: var(--neon-blue); font-size: 22px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            padding: 8px 12px; border-radius: 5px; transition: 0.2s;
-        }
-
-        .header-controls { display: flex; align-items: center; gap: 10px; }
-
-        .user-profile {
-            display: flex; align-items: center; gap: 8px; background: rgba(0, 210, 255, 0.1);
-            padding: 4px 10px; border-radius: 20px; border: 1px solid var(--neon-blue);
-        }
-        .user-avatar { width: 28px; height: 28px; border-radius: 50%; }
-        .logout-btn { background: transparent; border: none; color: #ff4a4a; cursor: pointer; font-size: 11px; padding: 0 4px; }
-
-        #chat-display { 
-            flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; 
-            gap: 14px; padding-bottom: 140px; -webkit-overflow-scrolling: touch; 
-        }
-
-        .bubble a { color: var(--neon-blue); text-decoration: underline; word-break: break-all; }
-        .bubble p { margin: 0 0 8px 0; }
-        .bubble p:last-child { margin-bottom: 0; }
-        .bubble h1, .bubble h2, .bubble h3 { color: var(--neon-blue); margin: 10px 0 6px 0; font-size: 1.1rem; }
-
-        #mirage-toast {
-            position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95); border: 2px solid var(--neon-blue); color: #fff;
-            padding: 15px 25px; border-radius: 15px; z-index: 1000; font-size: 13px;
-            text-align: center; box-shadow: 0 0 30px var(--led-glow);
-            opacity: 0; visibility: hidden; transition: 0.4s; pointer-events: none; max-width: 85%;
-        }
-        #mirage-toast.show { opacity: 1; visibility: visible; }
-
-        .sidebar-overlay {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 25; display: none;
-        }
-        .app-container.sidebar-open .sidebar-overlay { display: block; }
-
-        .bottom-fixed-area { 
-            position: absolute; bottom: 0; left: 0; width: 100%; 
-            background: linear-gradient(to top, #000 80%, transparent); z-index: 20; padding-bottom: env(safe-area-inset-bottom); 
-        }
-        
-        .copyright-bar { font-size: 9px; text-align: center; color: rgba(255, 255, 255, 0.3); padding: 8px 0; }
-        .console-container { padding: 10px 15px 20px 15px; }
-        
-        .input-wrapper { display: flex; align-items: center; gap: 12px; background: #080808; padding: 8px 16px; border-radius: 30px; border: 1px solid var(--glass-border); }
-        input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; padding: 10px 0; font-size: 16px; font-family: 'Tajawal', sans-serif; }
-        
-        .mem-toggle { width: 38px; height: 38px; border-radius: 50%; border: 1px solid #222; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; filter: grayscale(1); }
-        .mem-toggle.active { border-color: var(--neon-blue); background: rgba(0, 210, 255, 0.1); filter: grayscale(0); }
-        
-        #send-btn { background: linear-gradient(45deg, var(--neon-blue), var(--led-glow)); color: #000; border-radius: 50%; width: 40px; height: 40px; border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        html[dir="ltr"] #send-btn { transform: scaleX(-1); }
-
-        /* تنسيقات الفقاعات القياسية المصلحة */
-        .bubble { padding: 12px 18px; border-radius: 20px; max-width: 85%; font-size: 14.5px; line-height: 1.6; }
+        .bubble { padding: 12px 18px; border-radius: 20px; max-width: 80%; font-size: 14.5px; line-height: 1.6; word-wrap: break-word; }
         .ai-msg { background: rgba(255, 255, 255, 0.03); align-self: flex-start; border: 1px solid rgba(0, 210, 255, 0.1); }
         
-        /* حاوية رسالة المستخدم المحدثة (توزيع أفقي مرن لمنع التمدد الطولي) */
+        /* إصلاح تداخل وعرض حاوية رسائل المستخدم وزر التعديل */
         .user-msg-container { 
             display: flex; 
             align-items: center; 
@@ -206,41 +77,50 @@
             max-width: 85%;
             width: auto;
         }
-        .user-msg { 
-            background: rgba(0, 210, 255, 0.1); 
-            border: 1px solid var(--neon-blue);
-            width: auto;
-        }
+        .user-msg { background: rgba(0, 210, 255, 0.1); border: 1px solid var(--neon-blue); max-width: 100%; }
         
-        /* زر التعديل بجانب الفقاعة وموجه دوماً نحو مركز الشاشة لحمايته من الحواف */
-        .edit-msg-btn {
+        /* إصلاح مظهر زر القلم ليكون دائرياً مستقلاً تماماً وبدون تداخل */
+        .edit-msg-btn { 
             background: rgba(255, 255, 255, 0.05); 
             border: 1px solid rgba(0, 210, 255, 0.2); 
-            color: rgba(255,255,255,0.8); cursor: pointer; font-size: 13px; 
-            width: 32px; height: 32px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center;
-            transition: 0.2s; flex-shrink: 0;
+            color: rgba(255,255,255,0.8); 
+            cursor: pointer; 
+            font-size: 13px; 
+            width: 32px; 
+            height: 32px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: 0.2s; 
+            flex-shrink: 0; /* يمنع انضغاط الزر نهائياً */
         }
-        .edit-msg-btn:hover { background: var(--neon-blue); color: #000; border-color: var(--neon-blue); }
+        .edit-msg-btn:hover { background: var(--neon-blue); color: #000; border-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
 
-        /* تنسيق صندوق حقل التعديل */
         .edit-block-container { width: 100%; display: flex; flex-direction: column; gap: 8px; align-self: flex-end; max-width: 85%; }
-        .edit-input-field {
-            background: #111; color: #fff; border: 1px solid var(--neon-blue);
-            border-radius: 12px; padding: 10px; width: 100%; font-family: 'Tajawal', sans-serif;
-            font-size: 15px; resize: vertical; min-height: 60px; outline: none;
-        }
+        .edit-input-field { background: #111; color: #fff; border: 1px solid var(--neon-blue); border-radius: 12px; padding: 10px; width: 100%; font-family: 'Tajawal', sans-serif; font-size: 15px; resize: none; }
         .edit-actions { display: flex; gap: 8px; justify-content: flex-end; }
-        .edit-actions button {
-            padding: 6px 14px; border-radius: 6px; border: none; font-size: 13px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-weight: bold;
-        }
+        .edit-actions button { padding: 6px 14px; border-radius: 6px; border: none; font-size: 13px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-weight: bold; }
         .save-edit-btn { background: var(--neon-blue); color: #000; }
         .cancel-edit-btn { background: #222; color: #fff; }
 
-        @media (min-width: 769px) {
-            .delete-chat-btn { opacity: 0.3; }
-            .chat-item-wrapper:hover .delete-chat-btn { opacity: 1; }
-        }
+        .sidebar-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 25; display: none; }
+        .app-container.sidebar-open .sidebar-overlay { display: block; }
+
+        .bottom-fixed-area { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, #000 80%, transparent); z-index: 20; padding-bottom: env(safe-area-inset-bottom); }
+        .copyright-bar { font-size: 9px; text-align: center; color: rgba(255, 255, 255, 0.3); padding: 8px 0; }
+        .console-container { padding: 10px 15px 20px 15px; }
+        
+        .input-wrapper { display: flex; align-items: center; gap: 12px; background: #080808; padding: 8px 16px; border-radius: 30px; border: 1px solid var(--glass-border); }
+        input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; padding: 10px 0; font-size: 16px; font-family: 'Tajawal', sans-serif; }
+        
+        .mem-toggle { width: 38px; height: 38px; border-radius: 50%; border: 1px solid #222; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; filter: grayscale(1); transition: 0.3s; }
+        .mem-toggle.active { border-color: var(--neon-blue); background: rgba(0, 210, 255, 0.1); filter: grayscale(0); box-shadow: 0 0 10px var(--led-glow); }
+
+        #send-btn { background: linear-gradient(45deg, var(--neon-blue), var(--led-glow)); color: #000; border-radius: 50%; width: 40px; height: 40px; border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        #mirage-toast { position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.95); border: 2px solid var(--neon-blue); color: #fff; padding: 15px 25px; border-radius: 15px; z-index: 1000; font-size: 13px; text-align: center; box-shadow: 0 0 30px var(--led-glow); opacity: 0; visibility: hidden; transition: 0.4s; pointer-events: none; max-width: 85%; }
+        #mirage-toast.show { opacity: 1; visibility: visible; }
     </style>
 </head>
 <body>
@@ -261,17 +141,14 @@
         <header>
             <div style="display: flex; align-items: center; gap: 12px;">
                 <button class="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
-                <h1 style="color: var(--neon-blue); font-size: 1.25rem; margin: 0; font-family: 'Orbitron', sans-serif; letter-spacing: 2px; font-weight: 900;">MIRAGE AI</h1>
+                <h1 style="color: var(--neon-blue); font-size: 1.25rem; margin: 0; font-family: 'Orbitron', sans-serif; font-weight: 900;">MIRAGE AI</h1>
             </div>
             
             <div class="header-controls">
-                <div id="auth-container">
-                    <div id="google-btn"></div>
-                </div>
+                <div id="auth-container"><div id="google-btn"></div></div>
                 <select id="langSelect" onchange="changeLang(this.value)" style="background:#111; color:var(--neon-blue); border:1px solid #333; font-size:11px; border-radius:8px; padding: 5px; cursor: pointer;">
                     <option value="ar">العربية</option>
                     <option value="en">English</option>
-                    <option value="fr">Français</option>
                 </select>
             </div>
         </header>
@@ -279,12 +156,10 @@
         <div id="chat-display"></div>
 
         <div class="bottom-fixed-area">
-            <div class="copyright-bar">
-                جميع الحقوق محفوظة لدى <a href="https://mehdibn07.github.io/ORBIT/" style="color: var(--neon-blue); text-decoration: none;">ORBIT SYSTEM</a> © 2026
-            </div>
+            <div class="copyright-bar">جميع الحقوق محفوظة لدى ORBIT SYSTEM © 2026</div>
             <div class="console-container">
                 <div class="input-wrapper">
-                    <div id="memBtn" class="mem-toggle" onclick="toggleMemory()">🧠</div>
+                    <div id="memBtn" class="mem-toggle" onclick="handleMemoryClick()" title="تفعيل المزامنة السحابية">🧠</div>
                     <input type="text" id="queryInput" placeholder="أرسل رسالة للمدار..." autocomplete="off">
                     <button id="send-btn" onclick="handleSend()">➤</button>
                 </div>
@@ -295,21 +170,20 @@
 
 <script>
     const GOOGLE_CLIENT_ID = "86451093308-m5t74arb2v706v50qbls4pfoc4q4b0v1.apps.googleusercontent.com";
+    const CLOUD_STORAGE_API = "https://kvbin.org/api/v1/bins/"; 
 
     let allSessions = {}; 
     let currentSessionId = ""; 
     let currentUser = null;
 
     const translations = {
-        ar: { btnNewChat: "+ محادثة جديدة", defaultChatTitle: "محادثة فارغة 🛸", placeholder: "أرسل رسالة للمدار...", waiting: "جاري الإجابة...", welcome: "نظام MIRAGE AI جاهز. سجّل دخولك لتفعيل المزامنة السحابية المتعددة والانتقال بين محادثاتك السابقة ☁️.", mem_on: "الذاكرة نشطة محلياً 📱", mem_off: "تم مسح السجلات المحلية 🗑️", login: "تم تسجيل الدخول ومزامنة سحاب المدار بنجاح! ☁️👋", logout: "تم تسجيل الخروج والوضع المحلي 🚪", delete_confirm: "تم حذف الجلسة والمزامنة مع السحاب 🗑️☁️", save: "حفظ", cancel: "إلغاء" },
-        en: { btnNewChat: "+ New Chat", defaultChatTitle: "Empty Orbit 🛸", placeholder: "Message Orbit...", waiting: "Answering...", welcome: "MIRAGE AI is ready. Sign in to enable Multi-session Cloud Sync and switch between your previous chats ☁️.", mem_on: "Memory Active Locally 📱", mem_off: "Records Cleared 🗑️", login: "Logged in & Orbit Cloud Synced! ☁️👋", logout: "Logged out. Switched to local mode 🚪", delete_confirm: "Session deleted & synced to cloud 🗑️☁️", save: "Save", cancel: "Cancel" },
-        fr: { btnNewChat: "+ Nouvelle Discussion", defaultChatTitle: "Orbite Vide 🛸", placeholder: "Message Orbite...", waiting: "Réponse en cours...", welcome: "MIRAGE AI est prêt. Connectez-vous pour activer la synchronisation Cloud multi-session ☁️.", mem_on: "Mémoire Active Localement 📱", mem_off: "Registres Effacés 🗑️", login: "Connexion et synchronisation Cloud réussies! ☁️👋", logout: "Déconnexion. Mode local activé 🚪", delete_confirm: "Session supprimée et synchronisée sur le cloud 🗑️☁️", save: "Enregistrer", cancel: "Annuler" }
+        ar: { btnNewChat: "+ محادثة جديدة", defaultChatTitle: "محادثة فارغة 🛸", placeholder: "أرسل رسالة للمدار...", waiting: "جاري الإجابة...", welcome: "وضع الحفظ المحلي نشط تلقائياً 💾. اضغط على الـ 🧠 لتفعيل السحاب المزامَن.", cancel: "إلغاء", save: "حفظ" },
+        en: { btnNewChat: "+ New Chat", defaultChatTitle: "Empty Orbit 🛸", placeholder: "Message Orbit...", waiting: "Answering...", welcome: "Local save mode is active 💾. Click 🧠 to enable synced Cloud Storage.", cancel: "Cancel", save: "Save" }
     };
 
     marked.setOptions({ gfm: true, breaks: true });
-    function formatText(text) { return marked.parse(text); }
 
-    window.onload = async () => {
+    window.onload = () => {
         const savedLang = localStorage.getItem('mirage_lang') || 'ar';
         document.getElementById('langSelect').value = savedLang;
         changeLang(savedLang, false); 
@@ -318,31 +192,84 @@
         if (savedUser) {
             currentUser = JSON.parse(savedUser);
             updateAuthUI();
-            await fetchCloudAllSessions();
+            fetchCloudSessions(); 
         } else {
             initGoogleSignIn();
-            loadLocalSessions();
+            loadLocalSessions(); 
         }
     };
 
-    function toggleSidebar() {
-        document.getElementById('app-shell').classList.toggle('sidebar-open');
+    function toggleSidebar() { document.getElementById('app-shell').classList.toggle('sidebar-open'); }
+
+    function saveAllData() {
+        if (currentUser) {
+            saveToCloud();
+        } else {
+            localStorage.setItem('mirage_all_sessions', JSON.stringify(allSessions));
+            localStorage.setItem('mirage_current_session', currentSessionId);
+        }
     }
 
     function loadLocalSessions() {
         allSessions = JSON.parse(localStorage.getItem('mirage_all_sessions') || '{}');
+        document.getElementById('memBtn').classList.remove('active'); 
         if (Object.keys(allSessions).length === 0) {
             startNewChat();
         } else {
-            currentSessionId = Object.keys(allSessions)[0];
+            currentSessionId = localStorage.getItem('mirage_current_session') || Object.keys(allSessions)[0];
+            if (!allSessions[currentSessionId]) currentSessionId = Object.keys(allSessions)[0];
             renderChat();
             renderSidebarList();
+        }
+    }
+
+    async function saveToCloud() {
+        const cloudKey = btoa(currentUser.email).replace(/=/g, "").substring(0, 15);
+        try {
+            await fetch(`${CLOUD_STORAGE_API}${cloudKey}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ allSessions, currentSessionId })
+            });
+        } catch (e) { console.log("خطأ في المزامنة السحابية."); }
+    }
+
+    async function fetchCloudSessions() {
+        const cloudKey = btoa(currentUser.email).replace(/=/g, "").substring(0, 15);
+        document.getElementById('memBtn').classList.add('active'); 
+        try {
+            const response = await fetch(`${CLOUD_STORAGE_API}${cloudKey}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.allSessions) {
+                    allSessions = data.allSessions;
+                    currentSessionId = data.currentSessionId || Object.keys(allSessions)[0];
+                    renderChat();
+                    renderSidebarList();
+                    showPopup("☁️ تم مزامنة واسترجاع مدارك السحابي بنجاح!");
+                    return;
+                }
+            }
+        } catch (e) { console.log("بدء أول مزامنة سحابية."); }
+        startNewChat();
+    }
+
+    function handleMemoryClick() {
+        if (currentUser) {
+            showPopup("☁️ المزامنة السحابية التلقائية نشطة عبر حسابك ومؤمنة!");
+        } else {
+            showPopup("🔐 يرجى تسجيل الدخول لحساب جوجل أولاً لتفعيل السحاب.");
+            const googleBtnEl = document.querySelector('#google-btn iframe');
+            if (googleBtnEl) {
+                showPopup("يرجى الضغط على زر تسجيل الدخول الظاهر في الأعلى 👆");
+            }
         }
     }
 
     function startNewChat() {
         currentSessionId = "session_" + Date.now();
         allSessions[currentSessionId] = [];
+        saveAllData();
         renderChat();
         renderSidebarList();
         document.getElementById('app-shell').classList.remove('sidebar-open');
@@ -350,26 +277,22 @@
 
     function selectSession(id) {
         currentSessionId = id;
+        saveAllData();
         renderChat();
         renderSidebarList();
         document.getElementById('app-shell').classList.remove('sidebar-open');
     }
 
-    async function deleteSession(id, event) {
+    function deleteSession(id, event) {
         event.stopPropagation();
         delete allSessions[id];
         const remainingIds = Object.keys(allSessions);
         if (currentSessionId === id) {
-            if (remainingIds.length > 0) {
-                currentSessionId = remainingIds[0];
-            } else {
-                currentSessionId = "session_" + Date.now();
-                allSessions[currentSessionId] = [];
-            }
+            if (remainingIds.length > 0) currentSessionId = remainingIds[0];
+            else startNewChat();
         }
-        await saveAllSessionsToCloud();
-        const lang = localStorage.getItem('mirage_lang') || 'ar';
-        showPopup(translations[lang].delete_confirm);
+        saveAllData();
+        showPopup("تم حذف الجلسة بنجاح 🗑️");
         renderChat();
         renderSidebarList();
     }
@@ -403,10 +326,86 @@
         });
     }
 
+    function renderChat() {
+        const display = document.getElementById('chat-display');
+        display.innerHTML = '';
+        
+        const currentMemory = allSessions[currentSessionId] || [];
+        const lang = localStorage.getItem('mirage_lang') || 'ar';
+        const isRtl = document.getElementById('html-tag').dir === 'rtl';
+        
+        if (currentMemory.length === 0) {
+            const welcomeText = currentUser ? (lang === 'ar' ? `مرحباً بك يا **${currentUser.name}** في مدارك السحابي التلقائي 🪐☁️.` : `Welcome **${currentUser.name}** to your auto cloud Orbit 🪐☁️.`) : translations[lang].welcome;
+            addBubble('ai-msg', welcomeText);
+        } else {
+            currentMemory.forEach((msg, index) => {
+                if (msg.type === 'user-msg') {
+                    const container = document.createElement('div');
+                    container.className = 'user-msg-container';
+                    
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble user-msg';
+                    bubble.innerHTML = marked.parse(msg.text);
+
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'edit-msg-btn';
+                    editBtn.innerHTML = '✏️';
+                    editBtn.onclick = () => openEditMode(index, container);
+
+                    // ترتيب العناصر لحل مشكلة التداخل في كلا الاتجاهين
+                    if (isRtl) {
+                        container.appendChild(editBtn);
+                        container.appendChild(bubble);
+                    } else {
+                        container.appendChild(bubble);
+                        container.appendChild(editBtn);
+                    }
+                    display.appendChild(container);
+                } else {
+                    const div = document.createElement('div');
+                    div.className = `bubble ${msg.type}`;
+                    div.innerHTML = marked.parse(msg.text);
+                    display.appendChild(div);
+                }
+            });
+        }
+        display.scrollTop = display.scrollHeight;
+    }
+
+    async function handleSend() {
+        const input = document.getElementById('queryInput');
+        const lang = localStorage.getItem('mirage_lang') || 'ar';
+        const query = input.value.trim();
+        if (!query) return;
+
+        if(!allSessions[currentSessionId]) allSessions[currentSessionId] = [];
+        allSessions[currentSessionId].push({type: 'user-msg', text: query});
+        
+        saveAllData();
+        renderChat();
+        renderSidebarList();
+
+        input.value = '';
+        const loadingDiv = addBubble('ai-msg', translations[lang].waiting);
+
+        try {
+            const userContext = currentUser ? `The user's name is ${currentUser.name}. ` : '';
+            const systemInstruction = encodeURIComponent(`${userContext}Format using clean markdown. Reply in user's language.`);
+            const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(query)}?system=${systemInstruction}`);
+            const aiResponse = await response.text();
+            
+            loadingDiv.innerHTML = marked.parse(aiResponse.trim());
+            allSessions[currentSessionId].push({type: 'ai-msg', text: aiResponse.trim()});
+            
+            saveAllData(); 
+        } catch (e) { 
+            loadingDiv.innerText = "خطأ في الاتصال بالشبكة."; 
+        }
+    }
+
     function openEditMode(index, containerElement) {
         const originalText = allSessions[currentSessionId][index].text;
         const lang = localStorage.getItem('mirage_lang') || 'ar';
-        
         containerElement.className = 'edit-block-container';
         containerElement.innerHTML = `
             <textarea class="edit-input-field" id="edit-area-${index}">${originalText}</textarea>
@@ -423,142 +422,58 @@
 
         allSessions[currentSessionId][index].text = newText;
         allSessions[currentSessionId] = allSessions[currentSessionId].slice(0, index + 1);
-
+        
+        saveAllData();
         renderChat();
-        renderSidebarList();
 
         const lang = localStorage.getItem('mirage_lang') || 'ar';
         const loadingDiv = addBubble('ai-msg', translations[lang].waiting);
 
         try {
-            const userContext = currentUser ? `The user's name is ${currentUser.name}. ` : '';
-            const systemInstruction = encodeURIComponent(`${userContext}Format your output using clean markdown. Always reply in the user's language.`);
-            
-            const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(newText)}?system=${systemInstruction}`);
+            const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(newText)}`);
             const aiResponse = await response.text();
-            
-            loadingDiv.innerHTML = formatText(aiResponse.trim());
+            loadingDiv.innerHTML = marked.parse(aiResponse.trim());
             allSessions[currentSessionId].push({type: 'ai-msg', text: aiResponse.trim()});
-            
-            await saveAllSessionsToCloud();
-        } catch (e) { 
-            loadingDiv.innerText = "Error in connection."; 
-        }
+            saveAllData();
+        } catch (e) { loadingDiv.innerText = "خطأ."; }
     }
 
-    function renderChat() {
-        const display = document.getElementById('chat-display');
-        display.innerHTML = '';
-        
-        const currentMemory = allSessions[currentSessionId] || [];
-        const lang = localStorage.getItem('mirage_lang') || 'ar';
-        const isRtl = document.getElementById('html-tag').dir === 'rtl';
-        
-        if (currentMemory.length === 0) {
-            addBubble('ai-msg', currentUser ? (lang === 'ar' ? `مرحباً بك يا **${currentUser.name}** في نافذة جديدة بمدارك السحابي 🪐.` : `Welcome **${currentUser.name}** to a new secure Orbit window 🪐.`) : translations[lang].welcome);
-        } else {
-            currentMemory.forEach((msg, index) => {
-                if (msg.type === 'user-msg') {
-                    const container = document.createElement('div');
-                    container.className = 'user-msg-container';
-                    
-                    const bubble = document.createElement('div');
-                    bubble.className = 'bubble user-msg';
-                    bubble.innerHTML = formatText(msg.text);
-
-                    const editBtn = document.createElement('button');
-                    editBtn.className = 'edit-msg-btn';
-                    editBtn.innerHTML = '✏️';
-                    editBtn.title = lang === 'ar' ? "تعديل" : "Edit";
-                    editBtn.onclick = () => openEditMode(index, container);
-
-                    // الترتيب الذكي: في العربية (RTL) تظهر الفقاعة يساراً والزر يمينها ليتجه نحو منتصف الشاشة دائماً
-                    if (isRtl) {
-                        container.appendChild(editBtn); // الزر أولاً (على اليمين)
-                        container.appendChild(bubble);  // ثم الفقاعة (على اليسار)
-                    } else {
-                        container.appendChild(bubble);  // الفقاعة أولاً (على اليمين)
-                        container.appendChild(editBtn); // ثم الزر (على اليسار)
-                    }
-                    
-                    display.appendChild(container);
-                } else {
-                    const div = document.createElement('div');
-                    div.className = `bubble ${msg.type}`;
-                    div.innerHTML = formatText(msg.text);
-                    display.appendChild(div);
-                }
-            });
-        }
-        display.scrollTop = display.scrollHeight;
-    }
-
-    async function handleSend() {
-        const input = document.getElementById('queryInput');
-        const lang = localStorage.getItem('mirage_lang') || 'ar';
-        const query = input.value.trim();
-        if (!query) return;
-
-        if(!allSessions[currentSessionId]) allSessions[currentSessionId] = [];
-        const isFirstMessage = allSessions[currentSessionId].length === 0;
-
-        if(isFirstMessage) {
-            document.getElementById('chat-display').innerHTML = '';
-        }
-
-        allSessions[currentSessionId].push({type: 'user-msg', text: query});
-        renderChat();
-        
-        if(isFirstMessage) renderSidebarList(); 
-
-        input.value = '';
-        const loadingDiv = addBubble('ai-msg', translations[lang].waiting);
-
-        try {
-            const userContext = currentUser ? `The user's name is ${currentUser.name}. ` : '';
-            const systemInstruction = encodeURIComponent(`${userContext}Format your output using clean markdown. Always reply in the user's language.`);
-            
-            const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(query)}?system=${systemInstruction}`);
-            const aiResponse = await response.text();
-            
-            loadingDiv.innerHTML = formatText(aiResponse.trim());
-            allSessions[currentSessionId].push({type: 'ai-msg', text: aiResponse.trim()});
-            
-            await saveAllSessionsToCloud();
-        } catch (e) { 
-            loadingDiv.innerText = "Error in connection."; 
-        }
-        document.getElementById('chat-display').scrollTop = document.getElementById('chat-display').scrollHeight;
-    }
-
+    // تهيئة زر جوجل القياسي لمنع تداخل اللوجو الأبيض الدائري بشكل ممتاز ومتجاوب
     function initGoogleSignIn() {
         if (typeof google === 'undefined') return;
-        google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
-        google.accounts.id.renderButton(document.getElementById("google-btn"), { theme: "dark", size: "small", type: "standard", shape: "pill" });
+        google.accounts.id.initialize({ 
+            client_id: GOOGLE_CLIENT_ID, 
+            callback: handleCredentialResponse 
+        });
+        
+        google.accounts.id.renderButton(
+            document.getElementById("google-btn"), 
+            { 
+                theme: "filled_blue", 
+                size: "medium", 
+                shape: "pill",
+                text: "signin_with"
+            }
+        );
     }
 
-    async function handleCredentialResponse(response) {
+    function handleCredentialResponse(response) {
         const base64Url = response.credential.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-        const payload = JSON.parse(jsonPayload);
-        
+        const payload = JSON.parse(window.atob(base64));
         currentUser = { name: payload.given_name || payload.name, img: payload.picture, email: payload.email };
         localStorage.setItem('mirage_user', JSON.stringify(currentUser));
         updateAuthUI();
-        
-        const lang = localStorage.getItem('mirage_lang') || 'ar';
-        showPopup(translations[lang].login);
-        await fetchCloudAllSessions();
+        fetchCloudSessions(); 
     }
 
     function updateAuthUI() {
         const container = document.getElementById('auth-container');
         if (currentUser) {
             container.innerHTML = `
-                <div class="user-profile" title="${currentUser.email}">
-                    <img src="${currentUser.img}" class="user-avatar" alt="profile">
-                    <span style="font-size:11px; font-weight:bold; color:var(--neon-blue); max-width:60px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${currentUser.name}</span>
+                <div class="user-profile">
+                    <img src="${currentUser.img}" class="user-avatar">
+                    <span style="font-size:11px; font-weight:bold; color:var(--neon-blue); max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${currentUser.name}</span>
                     <button class="logout-btn" onclick="handleLogout()">🚪</button>
                 </div>
             `;
@@ -571,90 +486,35 @@
     function handleLogout() {
         localStorage.removeItem('mirage_user');
         currentUser = null;
-        allSessions = {};
         updateAuthUI();
-        startNewChat();
-        const lang = localStorage.getItem('mirage_lang') || 'ar';
-        showPopup(translations[lang].logout);
-    }
-
-    async function fetchCloudAllSessions() {
-        if (!currentUser) return;
-        try {
-            const safeKey = btoa(currentUser.email).replace(/=/g, "");
-            const response = await fetch(`https://text.pollinations.ai/orbit-multisession-${safeKey}`);
-            if (response.ok) {
-                const textData = await response.text();
-                if (textData && textData.trim().startsWith("{")) {
-                    allSessions = JSON.parse(textData);
-                    currentSessionId = Object.keys(allSessions)[0] || "session_default";
-                    if(!allSessions[currentSessionId]) allSessions[currentSessionId] = [];
-                    renderChat();
-                    renderSidebarList();
-                    return;
-                }
-            }
-        } catch (e) { console.log("Cloud server error."); }
         loadLocalSessions(); 
-    }
-
-    async function saveAllSessionsToCloud() {
-        if (!currentUser) {
-            localStorage.setItem('mirage_all_sessions', JSON.stringify(allSessions));
-            return;
-        }
-        try {
-            const safeKey = btoa(currentUser.email).replace(/=/g, "");
-            await fetch(`https://text.pollinations.ai/orbit-multisession-${safeKey}`, {
-                method: 'POST',
-                body: JSON.stringify(allSessions)
-            });
-        } catch(e) { console.log("Backup pending."); }
+        showPopup("تم الخروج والعودة لحفظ المتصفح المحلي 💾");
     }
 
     function showPopup(text) {
         const toast = document.getElementById('mirage-toast');
         toast.innerText = text;
         toast.classList.add('show');
-        setTimeout(() => { toast.classList.remove('show'); }, 3000);
-    }
-
-    function toggleMemory() {
-        if(currentUser) {
-            showPopup("الحفظ السحابي التلقائي نشط ومؤمن ☁️");
-            return;
-        }
-        const lang = localStorage.getItem('mirage_lang') || 'ar';
-        const btn = document.getElementById('memBtn');
-        const isActive = btn.classList.toggle('active');
-        localStorage.setItem('mirage_mem_on', isActive);
-        showPopup(isActive ? translations[lang].mem_on : translations[lang].mem_off);
+        setTimeout(() => { toast.classList.remove('show'); }, 3500);
     }
 
     function addBubble(cls, txt) {
-        const div = document.createElement('div');
-        div.className = `bubble ${cls}`;
-        div.innerHTML = formatText(txt);
-        const display = document.getElementById('chat-display');
-        display.appendChild(div);
-        display.scrollTop = display.scrollHeight;
-        return div;
+        const div = document.createElement('div'); div.className = `bubble ${cls}`;
+        div.innerHTML = marked.parse(txt);
+        const display = document.getElementById('chat-display'); display.appendChild(div);
+        display.scrollTop = display.scrollHeight; return div;
     }
 
     function changeLang(l, updateWelcome = true) { 
         document.getElementById('html-tag').dir = (l === 'ar' ? 'rtl' : 'ltr'); 
         localStorage.setItem('mirage_lang', l); 
-        
         document.getElementById('newChatBtn').innerText = translations[l].btnNewChat;
         document.getElementById('queryInput').placeholder = translations[l].placeholder;
-        
         renderSidebarList();
         if(updateWelcome) renderChat();
     }
 
-    document.getElementById('queryInput').addEventListener('keypress', (e) => { 
-        if(e.key === 'Enter') handleSend(); 
-    });
+    document.getElementById('queryInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') handleSend(); });
 </script>
 </body>
 </html>
