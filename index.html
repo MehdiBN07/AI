@@ -59,7 +59,7 @@
         
         #auth-container { display: flex; align-items: center; justify-content: center; }
 
-        /* 🆕 تصميم زر تسجيل الدخول المخصص باللوجو الجديد والشعاع */
+        /* تصميم زر تسجيل الدخول المخصص باللوجو المرفوع */
         .custom-login-btn {
             display: flex;
             align-items: center;
@@ -78,9 +78,10 @@
             box-shadow: 0 0 15px var(--neon-blue);
         }
         .custom-login-btn img {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             object-fit: contain;
+            border-radius: 4px;
         }
         .custom-login-btn span {
             color: #fff;
@@ -206,8 +207,9 @@
 <script>
     const GOOGLE_CLIENT_ID = "86451093308-m5t74arb2v706v50qbls4pfoc4q4b0v1.apps.googleusercontent.com";
     const CLOUD_STORAGE_API = "https://kvbin.org/api/v1/bins/"; 
-    // 🆕 رابط الشعار الجديد المرفق من قبلك لتسجيل الدخول
-    const CUSTOM_LOGO_URL = "https://share.google/aK0AuZuuMEborY721";
+    
+    // 🆕 تم التعديل لقراءة المسار النسبي المباشر للملف المرفوع في مستودعك
+    const CUSTOM_LOGO_URL = "images.png";
 
     let allSessions = {}; 
     let currentSessionId = ""; 
@@ -473,7 +475,6 @@
         } catch (e) { loadingDiv.innerText = "خطأ."; }
     }
 
-    // تهيئة نظام مصادقة جوجل القياسي خلف الكواليس لربطه بالزر المخصص الجديد
     function initGoogleSignIn() {
         if (typeof google === 'undefined') return;
         google.accounts.id.initialize({ 
@@ -482,7 +483,6 @@
         });
     }
 
-    // تشغيل نافذة جوجل المنبثقة الرسمية عند النقر على الزر المخصص
     function triggerGoogleAuth() {
         if (typeof google !== 'undefined') {
             google.accounts.id.prompt();
@@ -515,10 +515,9 @@
             if(desktopContainer) desktopContainer.innerHTML = profileHTML;
             if(mobileWrapper) mobileWrapper.innerHTML = profileHTML;
         } else {
-            // 🆕 بناء الأزرار المخصصة مع شعارك الجديد المضيء للكمبيوتر واللاب توب والموبايل
             const customLoginHTML = `
                 <div class="custom-login-btn" onclick="triggerGoogleAuth()">
-                    <img src="${CUSTOM_LOGO_URL}" alt="Google Logo">
+                    <img src="${CUSTOM_LOGO_URL}" alt="Orbit Logo" onerror="this.style.display='none'">
                     <span>${translations[lang].loginText}</span>
                 </div>
             `;
@@ -557,7 +556,6 @@
         document.getElementById('newChatBtn').innerText = translations[l].btnNewChat;
         document.getElementById('queryInput').placeholder = translations[l].placeholder;
         
-        // تحديث نصوص الأزرار المخصصة عند تبديل اللغة بدون كسر الهوية
         updateAuthUI();
         renderSidebarList();
         if(updateWelcome) renderChat();
