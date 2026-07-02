@@ -47,7 +47,7 @@
             color: var(--neon-blue);
             text-decoration: underline;
             cursor: pointer;
-            pointer-events: auto !important; /* ضمان استجابة الرابط للضغط */
+            pointer-events: auto !important; 
         }
 
         .app-container { display: flex; height: 100%; width: 100%; position: relative; }
@@ -573,55 +573,60 @@
     document.getElementById('queryInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') handleSend(); });
 
     // ==========================================
-    // 🔒 نظام الحماية المطور للموقع مع استثناء المحادثات
+    // 🔒 نظام الحماية المطور للموقع (نسخة معالجة النسخ الذكي)
     // ==========================================
     
-    // 1. منع استخدام القائمة اليمنى (Right Click)
+    // 1. منع استخدام القائمة اليمنى (Right Click) إلّا على الروابط
     document.addEventListener('contextmenu', function(e) {
-        // إذا كان الضغط الماوس الأيمن حدث فوق رابط، نتركه يعمل بشكل طبيعي لفتحه
         if (e.target.tagName === 'A') return;
-        
         e.preventDefault();
         showPopup("🔒 عذراً، تم تعطيل القائمة اليمنى لحماية النظام.");
     });
 
-    // 2. حظر اختصارات لوحة المفاتيح الشهيرة مع مراعاة السماح بالنسخ Ctrl+C داخل الشات
+    // 2. فحص وضبط اختصارات لوحة المفاتيح والنسخ والـ Inspect Element
     document.addEventListener('keydown', function(e) {
-        // حظر مفتاح F12
         if (e.key === 'F12') {
             e.preventDefault();
             showPopup("🔒 أدوات المطورين معطلة.");
             return false;
         }
 
-        // حظر Ctrl+Shift+I و Ctrl+Shift+J و Ctrl+Shift+C (أدوات فحص العناصر)
         if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
             e.preventDefault();
             showPopup("🔒 تم حظر الوصول لأدوات المطور.");
             return false;
         }
 
-        // حظر Ctrl+U (عرض سورس كود الصفحة)
         if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
             e.preventDefault();
             showPopup("🔒 عرض كود المصدر غير متاح.");
             return false;
         }
 
-        // حظر اختصار الحفظ Ctrl+S
         if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
             e.preventDefault();
             showPopup("🔒 حفظ الصفحة غير مسموح.");
             return false;
         }
 
-        // السماح بـ Ctrl+C فقط إذا كان التحديد داخل منطقة الشات والفقاعات
+        // 🔓 الفحص المطور لاختصار النسخ Ctrl+C لضمان عمله فوراً داخل فقاعات الشات
         if (e.ctrlKey && (e.key === 'C' || e.key === 'c')) {
-            const selectedNode = window.getSelection().anchorNode;
-            if (selectedNode) {
-                const parentBubble = selectedNode.parentElement.closest('.bubble');
-                // إذا كان التحديد خارج فقاعات الرسائل، نمنع النسخ
-                if (!parentBubble) {
+            const selection = window.getSelection();
+            if (selection && selection.rangeCount > 0) {
+                let node = selection.anchorNode;
+                let insideBubble = false;
+
+                // الصعود في شجرة الـ DOM للتأكد من أن النص يقع بالكامل داخل وسم يحمل كلاس .bubble
+                while (node && node !== document.body) {
+                    if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('bubble')) {
+                        insideBubble = true;
+                        break;
+                    }
+                    node = node.parentNode;
+                }
+
+                // إذا كان التحديد خارج الشات، نمنع عملية النسخ
+                if (!insideBubble) {
                     e.preventDefault();
                     showPopup("🔒 النسخ متاح فقط لمحتوى الإجابات والأسئلة.");
                     return false;
