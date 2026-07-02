@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MIRAGE AI | ORBIT SYSTEM</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Tajawal:wght@200;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght=500;900&family=Tajawal:wght=200;400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
@@ -59,29 +59,30 @@
         
         #auth-container { display: flex; align-items: center; justify-content: center; }
 
-        /* تصميم زر تسجيل الدخول المخصص باللوجو المرفوع */
+        /* 🛠️ إصلاح تصميم زر تسجيل الدخول لمنع التمدد والتداخل */
         .custom-login-btn {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            background: rgba(0, 210, 255, 0.03);
+            gap: 8px;
+            background: rgba(0, 210, 255, 0.05);
             border: 1px solid var(--neon-blue);
             padding: 6px 14px;
             border-radius: 20px;
             cursor: pointer;
             transition: 0.3s ease;
             box-shadow: 0 0 10px rgba(0, 210, 255, 0.1);
+            max-width: 180px;
         }
         .custom-login-btn:hover {
             background: rgba(0, 210, 255, 0.15);
             box-shadow: 0 0 15px var(--neon-blue);
         }
         .custom-login-btn img {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             object-fit: contain;
-            border-radius: 4px;
+            border-radius: 50%;
         }
         .custom-login-btn span {
             color: #fff;
@@ -208,7 +209,7 @@
     const GOOGLE_CLIENT_ID = "86451093308-m5t74arb2v706v50qbls4pfoc4q4b0v1.apps.googleusercontent.com";
     const CLOUD_STORAGE_API = "https://kvbin.org/api/v1/bins/"; 
     
-    // 🆕 تم التعديل لقراءة المسار النسبي المباشر للملف المرفوع في مستودعك
+    // مسار ملف الشعار الخاص بك في مستودع الجيت هاب
     const CUSTOM_LOGO_URL = "images.png";
 
     let allSessions = {}; 
@@ -216,8 +217,8 @@
     let currentUser = null;
 
     const translations = {
-        ar: { btnNewChat: "+ محادثة جديدة", defaultChatTitle: "محادثة فارغة 🛸", placeholder: "أرسل رسالة للمدار...", waiting: "جاري الإجابة...", welcome: "وضع الحفظ المحلي نشط تلقائياً 💾. اضغط على الـ 🧠 لتفعيل السحاب المزامَن.", cancel: "إلغاء", save: "حفظ", loginText: "تسجيل الدخول بجوجل" },
-        en: { btnNewChat: "+ New Chat", defaultChatTitle: "Empty Orbit 🛸", placeholder: "Message Orbit...", waiting: "Answering...", welcome: "Local save mode is active 💾. Click 🧠 to enable synced Cloud Storage.", cancel: "Cancel", save: "Save", loginText: "Sign in with Google" }
+        ar: { btnNewChat: "+ محادثة جديدة", defaultChatTitle: "محادثة فارغة 🛸", placeholder: "أرسل رسالة للمدار...", waiting: "جاري الإجابة...", welcome: "وضع الحفظ المحلي نشط تلقائياً 💾. اضغط على الـ 🧠 لتفعيل السحاب المزامَن.", cancel: "إلغاء", save: "حفظ", loginText: "تسجيل الدخول" },
+        en: { btnNewChat: "+ New Chat", defaultChatTitle: "Empty Orbit 🛸", placeholder: "Message Orbit...", waiting: "Answering...", welcome: "Local save mode is active 💾. Click 🧠 to enable synced Cloud Storage.", cancel: "Cancel", save: "Save", loginText: "Login" }
     };
 
     marked.setOptions({ gfm: true, breaks: true });
@@ -517,7 +518,7 @@
         } else {
             const customLoginHTML = `
                 <div class="custom-login-btn" onclick="triggerGoogleAuth()">
-                    <img src="${CUSTOM_LOGO_URL}" alt="Orbit Logo" onerror="this.style.display='none'">
+                    <img src="${CUSTOM_LOGO_URL}" alt="Logo" onerror="this.src='https://www.google.com/favicon.ico'">
                     <span>${translations[lang].loginText}</span>
                 </div>
             `;
