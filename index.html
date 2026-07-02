@@ -18,7 +18,29 @@
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none !important; }
-        body, html { height: 100%; margin: 0; padding: 0; background: var(--bg-dark); color: #fff; font-family: 'Tajawal', sans-serif; overflow: hidden; }
+        
+        /* 🔒 تفعيل حماية منع تحديد النصوص للموقع بالكامل */
+        body, html { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            background: var(--bg-dark); 
+            color: #fff; 
+            font-family: 'Tajawal', sans-serif; 
+            overflow: hidden; 
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* IE/Edge */
+            user-select: none;         /* Standard */
+        }
+
+        /* 🔓 استثناء حقول الإدخال لتسمح للمستخدم بالكتابة والتعديل بشكل طبيعي */
+        input[type="text"], textarea, .edit-input-field {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+        }
 
         .app-container { display: flex; height: 100%; width: 100%; position: relative; }
 
@@ -59,7 +81,7 @@
         
         #auth-container { display: flex; align-items: center; justify-content: center; }
 
-        /* 🛠️ إصلاح تصميم زر تسجيل الدخول لمنع التمدد والتداخل */
+        /* زر تسجيل الدخول المخصص المتجاوب */
         .custom-login-btn {
             display: inline-flex;
             align-items: center;
@@ -208,8 +230,6 @@
 <script>
     const GOOGLE_CLIENT_ID = "86451093308-m5t74arb2v706v50qbls4pfoc4q4b0v1.apps.googleusercontent.com";
     const CLOUD_STORAGE_API = "https://kvbin.org/api/v1/bins/"; 
-    
-    // مسار ملف الشعار الخاص بك في مستودع الجيت هاب
     const CUSTOM_LOGO_URL = "images.png";
 
     let allSessions = {}; 
@@ -535,6 +555,7 @@
         showPopup("تم الخروج والعودة لحفظ المتصفح المحلي 💾");
     }
 
+    // نظام التنبيه المنبثق
     function showPopup(text) {
         const toast = document.getElementById('mirage-toast');
         toast.innerText = text;
@@ -563,6 +584,47 @@
     }
 
     document.getElementById('queryInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') handleSend(); });
+
+    // ==========================================
+    // 🔒 سكريبت نظام الحماية المطور للموقع 
+    // ==========================================
+    
+    // 1. منع استخدام القائمة اليمنى (Right Click)
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        showPopup("🔒 عذراً، تم تعطيل القائمة اليمنى لحماية النظام.");
+    });
+
+    // 2. حظر اختصارات لوحة المفاتيح الشهيرة للنسخ وفحص الأكواد
+    document.addEventListener('keydown', function(e) {
+        // حظر مفتاح F12
+        if (e.key === 'F12') {
+            e.preventDefault();
+            showPopup("🔒 أدوات المطورين معطلة.");
+            return false;
+        }
+
+        // حظر Ctrl+Shift+I و Ctrl+Shift+J و Ctrl+Shift+C (أدوات فحص العناصر)
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+            e.preventDefault();
+            showPopup("🔒 تم حظر الوصول لأدوات المطور.");
+            return false;
+        }
+
+        // حظر Ctrl+U (عرض سورس كود الصفحة)
+        if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
+            e.preventDefault();
+            showPopup("🔒 عرض كود المصدر غير متاح.");
+            return false;
+        }
+
+        // حظر اختصارات النسخ والحفظ Ctrl+C و Ctrl+S
+        if (e.ctrlKey && (e.key === 'C' || e.key === 'c' || e.key === 'S' || e.key === 's')) {
+            e.preventDefault();
+            showPopup("🔒 النسخ وحفظ الصفحة غير مسموح.");
+            return false;
+        }
+    });
 </script>
 </body>
 </html>
