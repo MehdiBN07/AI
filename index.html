@@ -34,7 +34,7 @@
             user-select: none;         
         }
 
-        /* 🔓 السماح بالتحديد والنسخ داخل الشات وحقول الإدخال فقط */
+        /* 🔓 السماح بالتحديد داخل الشات وحقول الإدخال */
         input[type="text"], textarea, .edit-input-field, .bubble, .bubble * {
             -webkit-user-select: text !important;
             -moz-user-select: text !important;
@@ -42,7 +42,6 @@
             user-select: text !important;
         }
 
-        /* تنسيق الروابط داخل الشات للتأكد من سهولة الضغط عليها */
         .bubble a {
             color: var(--neon-blue);
             text-decoration: underline;
@@ -98,10 +97,7 @@
             box-shadow: 0 0 10px rgba(0, 210, 255, 0.1);
             max-width: 180px;
         }
-        .custom-login-btn:hover {
-            background: rgba(0, 210, 255, 0.15);
-            box-shadow: 0 0 15px var(--neon-blue);
-        }
+        .custom-login-btn:hover { background: rgba(0, 210, 255, 0.15); box-shadow: 0 0 15px var(--neon-blue); }
         .custom-login-btn img { width: 20px; height: 20px; object-fit: contain; border-radius: 50%; }
         .custom-login-btn span { color: #fff; font-size: 12px; font-weight: bold; font-family: 'Tajawal', sans-serif; white-space: nowrap; }
 
@@ -111,7 +107,7 @@
 
         #chat-display { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 14px; padding-bottom: 140px; }
 
-        .bubble { padding: 12px 18px; border-radius: 20px; max-width: 80%; font-size: 14.5px; line-height: 1.6; word-wrap: break-word; }
+        .bubble { padding: 12px 18px; border-radius: 20px; max-width: 80%; font-size: 14.5px; line-height: 1.6; word-wrap: break-word; position: relative; }
         .ai-msg { background: rgba(255, 255, 255, 0.03); align-self: flex-start; border: 1px solid rgba(0, 210, 255, 0.1); }
         
         .user-msg-container { display: flex; align-items: center; gap: 10px; align-self: flex-end; max-width: 85%; width: auto; }
@@ -149,6 +145,38 @@
         #mirage-toast { position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.95); border: 2px solid var(--neon-blue); color: #fff; padding: 15px 25px; border-radius: 15px; z-index: 1000; font-size: 13px; text-align: center; box-shadow: 0 0 30px var(--led-glow); opacity: 0; visibility: hidden; transition: 0.4s; pointer-events: none; max-width: 85%; }
         #mirage-toast.show { opacity: 1; visibility: visible; }
 
+        /* 🖥️ تنسيق القائمة السياقية المخصصة (المودم النيون) */
+        .custom-context-menu {
+            position: fixed;
+            background: rgba(4, 8, 20, 0.95);
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+            border-radius: 8px;
+            padding: 5px 0;
+            width: 150px;
+            z-index: 2000;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+        .context-menu-item {
+            padding: 10px 15px;
+            font-size: 13.5px;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.2s ease;
+            text-align: right;
+        }
+        html[dir="ltr"] .context-menu-item { text-align: left; }
+        .context-menu-item:hover {
+            background: rgba(0, 210, 255, 0.15);
+            color: var(--neon-blue);
+        }
+        .context-menu-item.delete-item { color: #ff4a4a; }
+        .context-menu-item.delete-item:hover { background: rgba(255, 74, 74, 0.15); color: #ff6b6b; }
+
         @media (max-width: 768px) {
             header .header-controls { display: none; }
             .mobile-controls-container { display: flex; }
@@ -166,6 +194,11 @@
 <body>
 
 <div id="mirage-toast"></div>
+
+<div id="custom-menu" class="custom-context-menu">
+    <div class="context-menu-item" onclick="executeContextAction('copy')">📋 نسخ النص</div>
+    <div class="context-menu-item delete-item" id="context-delete-option" onclick="executeContextAction('delete')">🗑️ حذف الرسالة</div>
+</div>
 
 <div class="app-container" id="app-shell">
     <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -223,10 +256,14 @@
     let allSessions = {}; 
     let currentSessionId = ""; 
     let currentUser = null;
+    
+    // متغيرات لحفظ حالة العنصر المضغطوط عليه بالقائمة السياقية
+    let targetedBubbleIndex = null;
+    let targetedBubbleText = "";
 
     const translations = {
-        ar: { btnNewChat: "+ محادثة جديدة", defaultChatTitle: "محادثة فارغة 🛸", placeholder: "أرسل رسالة للمدار...", waiting: "جاري الإجابة...", welcome: "وضع الحفظ المحلي نشط تلقائياً 💾. اضغط على الـ 🧠 لتفعيل السحاب المزامَن.", cancel: "إلغاء", save: "حفظ", loginText: "تسجيل الدخول" },
-        en: { btnNewChat: "+ New Chat", defaultChatTitle: "Empty Orbit 🛸", placeholder: "Message Orbit...", waiting: "Answering...", welcome: "Local save mode is active 💾. Click 🧠 to enable synced Cloud Storage.", cancel: "Cancel", save: "Save", loginText: "Login" }
+        ar: { btnNewChat: "+ محادثة جديدة", defaultChatTitle: "محادثة فارغة 🛸", placeholder: "أرسل رسالة للمدار...", waiting: "جاري الإجابة...", welcome: "وضع الحفظ المحلي نشط تلقائياً 💾. اضغط على الـ 🧠 لتفعيل السحاب المزامَن.", cancel: "إلغاء", save: "حفظ", loginText: "تسجيل الدخول", copyMenu: "📋 نسخ النص", deleteMenu: "🗑️ حذف الرسالة" },
+        en: { btnNewChat: "+ New Chat", defaultChatTitle: "Empty Orbit 🛸", placeholder: "Message Orbit...", waiting: "Answering...", welcome: "Local save mode is active 💾. Click 🧠 to enable synced Cloud Storage.", cancel: "Cancel", save: "Save", loginText: "Login", copyMenu: "📋 Copy Text", deleteMenu: "🗑️ Delete Message" }
     };
 
     marked.setOptions({ gfm: true, breaks: true });
@@ -244,7 +281,7 @@
             fetchCloudSessions(); 
         } else {
             initGoogleSignIn();
-            updateAuthUI();
+            updateAuthUIUI();
             loadLocalSessions(); 
         }
     };
@@ -392,6 +429,7 @@
                     
                     const bubble = document.createElement('div');
                     bubble.className = 'bubble user-msg';
+                    bubble.setAttribute('data-index', index); // لتحديد رقم العنصر
                     bubble.innerHTML = marked.parse(msg.text);
 
                     const editBtn = document.createElement('button');
@@ -410,6 +448,7 @@
                 } else {
                     const div = document.createElement('div');
                     div.className = `bubble ${msg.type}`;
+                    div.setAttribute('data-index', index); // لتحديد رقم العنصر
                     div.innerHTML = marked.parse(msg.text);
                     display.appendChild(div);
                 }
@@ -565,6 +604,12 @@
         document.getElementById('newChatBtn').innerText = translations[l].btnNewChat;
         document.getElementById('queryInput').placeholder = translations[l].placeholder;
         
+        // تحديث نصوص القائمة المخصصة حسب اللغة المحددة
+        const copyItem = document.querySelector('.context-menu-item:not(.delete-item)');
+        const deleteItem = document.getElementById('context-delete-option');
+        if(copyItem) copyItem.innerText = translations[l].copyMenu;
+        if(deleteItem) deleteItem.innerText = translations[l].deleteMenu;
+
         updateAuthUI();
         renderSidebarList();
         if(updateWelcome) renderChat();
@@ -573,66 +618,89 @@
     document.getElementById('queryInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') handleSend(); });
 
     // ==========================================
-    // 🔒 نظام الحماية المطور للموقع (نسخة معالجة النسخ الذكي)
+    // 🔒 نظام الحماية + 🛠️ القائمة السياقية الذكية المخصصة
     // ==========================================
     
-    // 1. منع استخدام القائمة اليمنى (Right Click) إلّا على الروابط
+    const customMenu = document.getElementById('custom-menu');
+
+    // 1. تفعيل القائمة المخصصة عند الضغط على الزر الأيمن في منطقة الشات فقط
     document.addEventListener('contextmenu', function(e) {
-        if (e.target.tagName === 'A') return;
-        e.preventDefault();
-        showPopup("🔒 عذراً، تم تعطيل القائمة اليمنى لحماية النظام.");
+        // إذا كان الحدث فوق رابط، نتركه يعمل بشكل طبيعي لفتحه
+        if (e.target.tagName === 'A') {
+            hideContextMenu();
+            return;
+        }
+
+        // العثور على الفقاعة المستهدفة بالصعود في الـ DOM
+        const bubble = e.target.closest('.bubble');
+
+        if (bubble) {
+            e.preventDefault();
+            targetedBubbleIndex = parseInt(bubble.getAttribute('data-index'));
+            
+            // جلب النص الخام الصافي من مصفوفة الذاكرة بدلاً من نص HTML
+            if(allSessions[currentSessionId] && allSessions[currentSessionId][targetedBubbleIndex]) {
+                targetedBubbleText = allSessions[currentSessionId][targetedBubbleIndex].text;
+            } else {
+                targetedBubbleText = bubble.innerText; // للرسالة الترحيبية الافتراضية
+            }
+
+            // إظهار أو إخفاء خيار الحذف (الترحيب لا يُحذف)
+            const deleteOption = document.getElementById('context-delete-option');
+            if (targetedBubbleIndex === null || isNaN(targetedBubbleIndex)) {
+                deleteOption.style.display = 'none';
+            } else {
+                deleteOption.style.display = 'flex';
+            }
+
+            // ضبط موقع ظهور القائمة بشكل متناسق
+            customMenu.style.top = `${e.clientY}px`;
+            customMenu.style.left = `${e.clientX}px`;
+            customMenu.style.display = 'block';
+        } else {
+            // حظر الزر الأيمن في باقي أجزاء الموقع لحمايته
+            e.preventDefault();
+            hideContextMenu();
+            showPopup("🔒 عذراً، تم تعطيل القائمة اليمنى لحماية النظام.");
+        }
     });
 
-    // 2. فحص وضبط اختصارات لوحة المفاتيح والنسخ والـ Inspect Element
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'F12') {
-            e.preventDefault();
-            showPopup("🔒 أدوات المطورين معطلة.");
-            return false;
-        }
+    // 2. إخفاء القائمة عند الضغط في أي مكان آخر
+    document.addEventListener('click', function() {
+        hideContextMenu();
+    });
 
-        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
-            e.preventDefault();
-            showPopup("🔒 تم حظر الوصول لأدوات المطور.");
-            return false;
-        }
+    function hideContextMenu() {
+        customMenu.style.display = 'none';
+    }
 
-        if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
-            e.preventDefault();
-            showPopup("🔒 عرض كود المصدر غير متاح.");
-            return false;
-        }
-
-        if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
-            e.preventDefault();
-            showPopup("🔒 حفظ الصفحة غير مسموح.");
-            return false;
-        }
-
-        // 🔓 الفحص المطور لاختصار النسخ Ctrl+C لضمان عمله فوراً داخل فقاعات الشات
-        if (e.ctrlKey && (e.key === 'C' || e.key === 'c')) {
-            const selection = window.getSelection();
-            if (selection && selection.rangeCount > 0) {
-                let node = selection.anchorNode;
-                let insideBubble = false;
-
-                // الصعود في شجرة الـ DOM للتأكد من أن النص يقع بالكامل داخل وسم يحمل كلاس .bubble
-                while (node && node !== document.body) {
-                    if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('bubble')) {
-                        insideBubble = true;
-                        break;
-                    }
-                    node = node.parentNode;
-                }
-
-                // إذا كان التحديد خارج الشات، نمنع عملية النسخ
-                if (!insideBubble) {
-                    e.preventDefault();
-                    showPopup("🔒 النسخ متاح فقط لمحتوى الإجابات والأسئلة.");
-                    return false;
-                }
+    // 3. تنفيذ العمليات (نسخ أو حذف) عند اختيار خيار من القائمة المخصصة
+    function executeContextAction(action) {
+        if (action === 'copy') {
+            navigator.clipboard.writeText(targetedBubbleText).then(() => {
+                showPopup("📋 تم نسخ النص الحقيقي للرسالة بنجاح!");
+            }).catch(() => {
+                showPopup("❌ فشل النسخ التلقائي.");
+            });
+        } else if (action === 'delete') {
+            if (targetedBubbleIndex !== null && !isNaN(targetedBubbleIndex)) {
+                // إزالة الرسالة من الجلسة
+                allSessions[currentSessionId].splice(targetedBubbleIndex, 1);
+                saveAllData();
+                renderChat();
+                renderSidebarList();
+                showPopup("🗑️ تم حذف الرسالة بنجاح.");
             }
         }
+        hideContextMenu();
+    }
+
+    // 4. حظر الاختصارات الضارة باللوحة مع السماح بالنسخ العادي إن تم بالمتصفح
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12') { e.preventDefault(); showPopup("🔒 أدوات المطورين معطلة."); return false; }
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) { e.preventDefault(); showPopup("🔒 تم حظر الوصول لأدوات المطور."); return false; }
+        if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); showPopup("🔒 عرض كود المصدر غير متاح."); return false; }
+        if (e.ctrlKey && (e.key === 'S' || e.key === 's')) { e.preventDefault(); showPopup("🔒 حفظ الصفحة غير مسموح."); return false; }
     });
 </script>
 </body>
