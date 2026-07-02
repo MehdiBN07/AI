@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MIRAGE AI | ORBIT SYSTEM</title>
+    <!-- استدعاء الخطوط -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Tajawal:wght@200;400;700&display=swap" rel="stylesheet">
+    <!-- مكتبة Marked لتنسيق النصوص -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- مكتبة جوجل الرسمية لتسجيل الدخول -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
     <style>
         :root { 
             --neon-blue: #00d2ff; 
@@ -13,7 +19,6 @@
             --glass-border: rgba(0, 210, 255, 0.2);
         }
 
-        /* إزالة المربع الأزرق نهائياً */
         * { 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
@@ -38,17 +43,57 @@
             backdrop-filter: blur(15px);
         }
 
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* تنسيق بروفايل المستخدم بعد تسجيل الدخول */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.05);
+            padding: 4px 8px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid var(--neon-blue);
+        }
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: #ff4a4a;
+            cursor: pointer;
+            font-size: 11px;
+            font-family: 'Tajawal', sans-serif;
+            padding: 0 4px;
+        }
+
         #chat-display { 
             flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; 
             gap: 12px; padding-bottom: 140px; -webkit-overflow-scrolling: touch; 
         }
 
-        /* تنسيق الروابط داخل الرسائل */
         .bubble a {
             color: var(--neon-blue);
             text-decoration: underline;
             word-break: break-all;
             text-shadow: 0 0 5px var(--led-glow);
+        }
+        .bubble p { margin: 0 0 8px 0; }
+        .bubble p:last-child { margin-bottom: 0; }
+        .bubble ul, .bubble ol { margin: 5px 0; padding-inline-start: 20px; }
+        .bubble li { margin-bottom: 4px; }
+        .bubble h1, .bubble h2, .bubble h3 { 
+            color: var(--neon-blue); 
+            margin: 10px 0 6px 0; 
+            font-size: 1.1rem;
         }
 
         #mirage-toast {
@@ -106,6 +151,9 @@
         }
         #send-btn:active { transform: scale(0.9); }
 
+        html[dir="ltr"] #send-btn { transform: scaleX(-1); }
+        html[dir="ltr"] #send-btn:active { transform: scaleX(-1) scale(0.9); }
+
         .bubble { 
             padding: 14px 18px; border-radius: 20px; max-width: 85%; 
             font-size: 14.5px; line-height: 1.6; word-wrap: break-word;
@@ -136,11 +184,19 @@
             <a href="https://mehdibn07.github.io/ORBIT/" style="text-decoration:none; font-size:1.5rem; color: var(--neon-blue);">🛸</a>
             <h1 style="color: var(--neon-blue); font-size: 1.25rem; margin: 0; font-family: 'Orbitron', sans-serif; letter-spacing: 3px; font-weight: 900; text-shadow: 0 0 12px var(--led-glow);">MIRAGE AI</h1>
         </div>
-        <select id="langSelect" onchange="changeLang(this.value)" style="background:#111; color:var(--neon-blue); border:1px solid #333; font-size:11px; border-radius:8px; padding: 5px; outline:none;">
-            <option value="ar">العربية</option>
-            <option value="en">English</option>
-            <option value="fr">Français</option>
-        </select>
+        
+        <div class="header-controls">
+            <!-- مساحة زر جوجل أو ملف المستخدم الشخصي -->
+            <div id="auth-container">
+                <div id="google-btn"></div>
+            </div>
+
+            <select id="langSelect" onchange="changeLang(this.value)" style="background:#111; color:var(--neon-blue); border:1px solid #333; font-size:11px; border-radius:8px; padding: 5px; outline:none; cursor: pointer;">
+                <option value="ar">العربية</option>
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+            </select>
+        </div>
     </header>
 
     <div id="chat-display"></div>
@@ -160,35 +216,104 @@
 </div>
 
 <script>
-    let memory = [];
+    // تم هنا تحديث مفتاح الـ Client ID الحقيقي الخاص بك بنجاح
+    const GOOGLE_CLIENT_ID = "86451093308-m5t74arb2v706v50qbls4pfoc4q4b0v1.apps.googleusercontent.com";
 
-    // قاموس النصوص
+    let memory = [];
+    let currentUser = null;
+
     const translations = {
-        ar: { placeholder: "أرسل رسالة للمدار...", waiting: "جاري الإجابة...", welcome: "نظام MIRAGE AI جاهز. قم بتفعيل الذاكرة (🧠) لحفظ سجل المحادثات على جهازك.", mem_on: "الذاكرة نشطة 📱", mem_off: "تم مسح السجلات 🗑️", sync: "تمت مزامنة بيانات المدار 🪐" },
-        en: { placeholder: "Message Orbit...", waiting: "Answering...", welcome: "MIRAGE AI is ready. Enable memory (🧠) to save chat history on your device.", mem_on: "Memory Active 📱", mem_off: "Records Cleared 🗑️", sync: "Orbit data synced 🪐" },
-        fr: { placeholder: "Message Orbite...", waiting: "Réponse en cours...", welcome: "MIRAGE AI est prêt. Activez la mémoire (🧠) pour sauvegarder l'historique.", mem_on: "Mémoire Active 📱", mem_off: "Registres Effacés 🗑️", sync: "Données synchronisées 🪐" }
+        ar: { placeholder: "أرسل رسالة للمدار...", waiting: "جاري الإجابة...", welcome: "نظام MIRAGE AI جاهز. قم بتفعيل الذاكرة (🧠) لحفظ سجل المحادثات على جهازك.", mem_on: "الذاكرة نشطة 📱", mem_off: "تم مسح السجلات 🗑️", sync: "تمت مزامنة بيانات المدار 🪐", login: "تم تسجيل الدخول بنجاح! 👋", logout: "تم تسجيل الخروج 🚪" },
+        en: { placeholder: "Message Orbit...", waiting: "Answering...", welcome: "MIRAGE AI is ready. Enable memory (🧠) to save chat history on your device.", mem_on: "Memory Active 📱", mem_off: "Records Cleared 🗑️", sync: "Orbit data synced 🪐", login: "Logged in successfully! 👋", logout: "Logged out 🚪" },
+        fr: { placeholder: "Message Orbite...", waiting: "Réponse en cours...", welcome: "MIRAGE AI est prêt. Activez la mémoire (🧠) pour sauvegarder l'historique.", mem_on: "Mémoire Active 📱", mem_off: "Registres Effacés 🗑️", sync: "Données synchronisées 🪐", login: "Connexion réussie! 👋", logout: "Déconnexion 🚪" }
     };
 
-    function linkify(text) {
-        const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-        return text.replace(urlPattern, '<a href="$1" target="_blank">$1</a>');
-    }
+    marked.setOptions({ gfm: true, breaks: true });
+
+    function formatText(text) { return marked.parse(text); }
 
     window.onload = () => {
         const savedLang = localStorage.getItem('mirage_lang') || 'ar';
         document.getElementById('langSelect').value = savedLang;
-        changeLang(savedLang);
+        changeLang(savedLang, false); 
         
+        const savedUser = localStorage.getItem('mirage_user');
+        if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+            updateAuthUI();
+        } else {
+            initGoogleSignIn();
+        }
+
         if(localStorage.getItem('mirage_mem_on') === 'true') {
             document.getElementById('memBtn').classList.add('active');
             memory = JSON.parse(localStorage.getItem('mirage_history') || '[]');
             renderChat();
             showPopup(translations[savedLang].sync);
         } else {
-            // إعادة الرسالة التنبيهية التي حُذفت
-            addBubble('ai-msg', translations[savedLang].welcome);
+            clearChatAndShowWelcome(savedLang);
         }
     };
+
+    // --- إعدادات خدمات جوجل للـ Authentication ---
+    function initGoogleSignIn() {
+        if (typeof google === 'undefined') return;
+        
+        google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleCredentialResponse
+        });
+
+        google.accounts.id.renderButton(
+            document.getElementById("google-btn"),
+            { theme: "dark", size: "small", type: "icon", shape: "circle" } 
+        );
+    }
+
+    function handleCredentialResponse(response) {
+        const base64Url = response.credential.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        const payload = JSON.parse(jsonPayload);
+        
+        currentUser = {
+            name: payload.name,
+            img: payload.picture,
+            email: payload.email
+        };
+
+        localStorage.setItem('mirage_user', JSON.stringify(currentUser));
+        updateAuthUI();
+        
+        const lang = localStorage.getItem('mirage_lang') || 'ar';
+        showPopup(translations[lang].login);
+    }
+
+    function updateAuthUI() {
+        const container = document.getElementById('auth-container');
+        if (currentUser) {
+            container.innerHTML = `
+                <div class="user-profile" title="${currentUser.email}">
+                    <img src="${currentUser.img}" class="user-avatar" alt="profile">
+                    <button class="logout-btn" onclick="handleLogout()">Logout</button>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `<div id="google-btn"></div>`;
+            initGoogleSignIn();
+        }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('mirage_user');
+        currentUser = null;
+        updateAuthUI();
+        const lang = localStorage.getItem('mirage_lang') || 'ar';
+        showPopup(translations[lang].logout);
+    }
 
     function showPopup(text) {
         const toast = document.getElementById('mirage-toast');
@@ -203,10 +328,16 @@
         memory.forEach(msg => {
             const div = document.createElement('div');
             div.className = `bubble ${msg.type}`;
-            div.innerHTML = linkify(msg.text);
+            div.innerHTML = formatText(msg.text);
             display.appendChild(div);
         });
         display.scrollTop = display.scrollHeight;
+    }
+
+    function clearChatAndShowWelcome(lang) {
+        const display = document.getElementById('chat-display');
+        display.innerHTML = '';
+        addBubble('ai-msg', translations[lang].welcome);
     }
 
     async function handleSend() {
@@ -215,21 +346,33 @@
         const query = input.value.trim();
         if (!query) return;
 
-        memory.push({type: 'user-msg', text: query});
-        input.value = '';
-        renderChat();
+        const isMemActive = localStorage.getItem('mirage_mem_on') === 'true';
 
+        if(!isMemActive && memory.length === 0) {
+            document.getElementById('chat-display').innerHTML = '';
+        }
+
+        addBubble('user-msg', query);
+        if(isMemActive) memory.push({type: 'user-msg', text: query});
+        
+        input.value = '';
         const loadingDiv = addBubble('ai-msg', translations[lang].waiting);
 
         try {
-            const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(query)}`);
+            const userContext = currentUser ? `The user's name is ${currentUser.name}. ` : '';
+            const systemInstruction = encodeURIComponent(`${userContext}Format your output using clean markdown. Use clear headings, bullet points, and short paragraphs. Avoid dense walls of text. Always reply in the user's language.`);
+            
+            const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(query)}?system=${systemInstruction}`);
             const aiResponse = await response.text();
             
-            loadingDiv.innerHTML = linkify(aiResponse.trim());
-            memory.push({type: 'ai-msg', text: aiResponse.trim()});
-            saveToLocal();
+            loadingDiv.innerHTML = formatText(aiResponse.trim());
+            
+            if(isMemActive) {
+                memory.push({type: 'ai-msg', text: aiResponse.trim()});
+                saveToLocal();
+            }
         } catch (e) { 
-            loadingDiv.innerText = "Error in connection."; 
+            loadingDiv.innerText = lang === 'ar' ? "خطأ في الاتصال بالشبكة." : (lang === 'fr' ? "Erreur de connexion." : "Error in connection."); 
         }
         document.getElementById('chat-display').scrollTop = document.getElementById('chat-display').scrollHeight;
     }
@@ -239,11 +382,14 @@
         const btn = document.getElementById('memBtn');
         const isActive = btn.classList.toggle('active');
         localStorage.setItem('mirage_mem_on', isActive);
-        if(isActive) showPopup(translations[lang].mem_on);
-        else {
+        
+        if(isActive) {
+            showPopup(translations[lang].mem_on);
+            saveToLocal();
+        } else {
             localStorage.removeItem('mirage_history');
             memory = [];
-            renderChat();
+            clearChatAndShowWelcome(lang);
             showPopup(translations[lang].mem_off);
         }
     }
@@ -257,16 +403,21 @@
     function addBubble(cls, txt) {
         const div = document.createElement('div');
         div.className = `bubble ${cls}`;
-        div.innerHTML = linkify(txt);
-        document.getElementById('chat-display').appendChild(div);
-        document.getElementById('chat-display').scrollTop = document.getElementById('chat-display').scrollHeight;
+        div.innerHTML = formatText(txt);
+        const display = document.getElementById('chat-display');
+        display.appendChild(div);
+        display.scrollTop = display.scrollHeight;
         return div;
     }
 
-    function changeLang(l) { 
+    function changeLang(l, updateWelcome = true) { 
         document.getElementById('html-tag').dir = (l === 'ar' ? 'rtl' : 'ltr'); 
         localStorage.setItem('mirage_lang', l); 
         document.getElementById('queryInput').placeholder = translations[l].placeholder;
+        
+        if(updateWelcome && localStorage.getItem('mirage_mem_on') !== 'true' && memory.length === 0) {
+            clearChatAndShowWelcome(l);
+        }
     }
 
     document.getElementById('queryInput').addEventListener('keypress', (e) => { 
