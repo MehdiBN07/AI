@@ -7,72 +7,35 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Tajawal:wght=200;400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;400;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --neon-blue: #00d2ff; --led-glow: #008fcc; --bg-dark: #02040a; --glass-border: rgba(0, 210, 255, 0.2); --sidebar-width: 280px; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none !important; }
-        body, html { height: 100%; margin: 0; padding: 0; background: var(--bg-dark); color: #fff; font-family: 'Tajawal', sans-serif; overflow: hidden; user-select: none; }
-        .app-container { display: flex; height: 100%; width: 100%; position: relative; }
-        .sidebar { width: var(--sidebar-width); background: #040814; border-left: 1px solid var(--glass-border); display: flex; flex-direction: column; position: absolute; top: 0; bottom: 0; right: 0; transform: translateX(100%); transition: 0.3s; z-index: 30; }
-        .app-container.sidebar-open .sidebar { transform: translateX(0); }
-        .reviews-section { padding: 15px; border-top: 1px solid var(--glass-border); color: white; }
-        .review-card { background: rgba(255,255,255,0.05); padding: 10px; margin: 8px 0; border-radius: 8px; border-right: 3px solid var(--neon-blue); font-size: 13px; }
-        .del-btn { color: #ff4a4a; cursor: pointer; margin-right: 10px; }
-        .main-shell { flex: 1; display: flex; flex-direction: column; height: 100%; background: var(--bg-dark); }
-        header { height: 60px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--neon-blue); }
-        #chat-display { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 14px; padding-bottom: 140px; }
-        .bubble { padding: 12px 18px; border-radius: 20px; max-width: 80%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 210, 255, 0.1); }
-        .input-wrapper { display: flex; align-items: center; gap: 12px; background: #080808; padding: 8px 16px; border-radius: 30px; border: 1px solid var(--glass-border); }
-        input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; padding: 10px 0; font-size: 16px; font-family: 'Tajawal', sans-serif; }
+        :root { --neon-blue: #00d2ff; --bg-dark: #02040a; }
+        body { background: var(--bg-dark); color: #fff; font-family: 'Tajawal', sans-serif; margin: 0; }
+        .app-container { display: flex; height: 100vh; }
+        .main-shell { flex: 1; display: flex; flex-direction: column; }
+        header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--neon-blue); }
+        .custom-login-btn { cursor:pointer; background: transparent; border: 1px solid var(--neon-blue); padding: 8px 16px; border-radius: 20px; color: var(--neon-blue); }
+        .user-profile { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--neon-blue); }
     </style>
 </head>
 <body>
 
-<div id="mirage-toast" style="position:fixed; top:25%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.95); border:1px solid var(--neon-blue); padding:15px; border-radius:15px; z-index:1000; display:none;"></div>
-
-<div id="custom-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
-    <div style="background:#0a0e1a; border:1px solid var(--neon-blue); padding:25px; border-radius:20px; width:90%; max-width:350px; text-align:center;">
-        <h3 style="color:var(--neon-blue);">إضافة تقييم</h3>
-        <textarea id="review-text-input" style="width:100%; height:80px; background:#151a28; color:white; border:1px solid #333; border-radius:10px; padding:10px;"></textarea>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <button onclick="closeModal()" style="flex:1; background:#333; border:none; color:white; padding:10px; border-radius:10px;">إلغاء</button>
-            <button onclick="submitReview()" style="flex:1; background:var(--neon-blue); border:none; color:black; padding:10px; border-radius:10px;">إرسال</button>
-        </div>
-    </div>
-</div>
-
-<div class="app-container" id="app-shell">
-    <div class="sidebar">
-        <div style="padding:15px;">
-            <button onclick="startNewChat()" style="width:100%; background:transparent; color:var(--neon-blue); border:1px dashed var(--neon-blue); padding:10px; border-radius:8px; cursor:pointer;">+ محادثة جديدة</button>
-        </div>
-        <div class="reviews-section">
-            <h4 style="color:var(--neon-blue);">تقييمات المدار:</h4>
-            <div id="reviews-list"></div>
-            <button onclick="addReview()" style="width:100%; padding:8px; background:transparent; border:1px solid var(--neon-blue); color:white; border-radius:5px; cursor:pointer;">إضافة تقييم</button>
-        </div>
-    </div>
-
+<div class="app-container">
     <div class="main-shell">
         <header>
-            <button onclick="document.getElementById('app-shell').classList.toggle('sidebar-open')" style="background:none; border:none; color:var(--neon-blue); font-size:24px;">☰</button>
-            <h1 style="color:var(--neon-blue); font-size:1.2rem;">MIRAGE AI</h1>
+            <h1 style="color:var(--neon-blue); margin:0;">MIRAGE AI</h1>
             <div id="auth-container"></div>
         </header>
-        <div id="chat-display"></div>
-        <div style="position:absolute; bottom:20px; width:100%; padding:0 15px;">
-            <div class="input-wrapper">
-                <input type="text" id="queryInput" placeholder="أرسل رسالة...">
-                <button id="send-btn" onclick="handleSend()" style="background:var(--neon-blue); border:none; border-radius:50%; width:40px; height:40px;">➤</button>
-            </div>
-        </div>
+        <div id="chat-display" style="flex:1;"></div>
     </div>
 </div>
 
 <script>
+    // الإعدادات
+    const GOOGLE_CLIENT_ID = "86451093308-m5t74arb2v706v50qbls4pfoc4q4b0v1.apps.googleusercontent.com";
     const firebaseConfig = {
         apiKey: "AIzaSyAGlPJDsGdA6Y2BShTy3LJeguYfT5ahfgI",
         authDomain: "mirageai-1ff67.firebaseapp.com",
@@ -81,55 +44,47 @@
         messagingSenderId: "54774597616",
         appId: "1:54774597616:web:c084ed8283943d51b7bf35"
     };
+    
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
     let currentUser = JSON.parse(localStorage.getItem('mirage_user'));
 
-    function loadReviews() {
-        db.collection("reviews").orderBy("timestamp", "desc").onSnapshot(snapshot => {
-            const list = document.getElementById('reviews-list');
-            list.innerHTML = "";
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const div = document.createElement('div');
-                div.className = "review-card";
-                div.innerHTML = `<strong>${data.user}:</strong> ${data.text}`;
-                if(currentUser && currentUser.email === "channelanime697@gmail.com") {
-                    const del = document.createElement('span');
-                    del.innerHTML = " 🗑️";
-                    del.className = "del-btn";
-                    del.onclick = () => db.collection("reviews").doc(doc.id).delete();
-                    div.appendChild(del);
-                }
-                list.appendChild(div);
+    // تهيئة جوجل
+    window.onload = () => {
+        if (typeof google !== 'undefined') {
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleCredentialResponse
             });
-        });
+        }
+        updateAuthUI();
+    };
+
+    function handleCredentialResponse(response) {
+        const payload = JSON.parse(window.atob(response.credential.split('.')[1]));
+        currentUser = { name: payload.given_name, img: payload.picture, email: payload.email };
+        localStorage.setItem('mirage_user', JSON.stringify(currentUser));
+        updateAuthUI();
     }
 
-    function addReview() {
-        if(!currentUser) return alert("سجل دخولك أولاً!");
-        document.getElementById('custom-modal').style.display = 'flex';
-    }
-
-    function closeModal() { document.getElementById('custom-modal').style.display = 'none'; }
-
-    async function submitReview() {
-        const text = document.getElementById('review-text-input').value;
-        if(text.trim()) {
-            await db.collection("reviews").add({
-                text: text,
-                user: currentUser.name,
-                email: currentUser.email,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            document.getElementById('review-text-input').value = "";
-            closeModal();
+    function updateAuthUI() {
+        const container = document.getElementById('auth-container');
+        if (currentUser) {
+            container.innerHTML = `
+                <div class="user-profile">
+                    <img src="${currentUser.img}" class="user-avatar">
+                    <button onclick="handleLogout()" style="background:none; border:none; color:red; cursor:pointer;">خروج</button>
+                </div>`;
+        } else {
+            container.innerHTML = `
+                <button class="custom-login-btn" onclick="google.accounts.id.prompt()">تسجيل الدخول</button>`;
         }
     }
 
-    window.onload = () => { loadReviews(); /* استدعاء بقية دوال المشروع هنا */ };
-    function handleSend() { /* منطق الإرسال الخاص بك */ }
-    function startNewChat() { /* منطق الجلسة */ }
+    function handleLogout() {
+        localStorage.removeItem('mirage_user');
+        currentUser = null;
+        updateAuthUI();
+    }
 </script>
 </body>
 </html>
