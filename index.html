@@ -1,41 +1,46 @@
 <!DOCTYPE html>
-<html id="html-tag" lang="ar" dir="rtl">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MIRAGE AI | ORBIT SYSTEM</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;400;700&display=swap" rel="stylesheet">
-    
     <style>
-        :root { --neon-blue: #00d2ff; --bg-dark: #02040a; }
-        body { background: var(--bg-dark); color: #fff; font-family: 'Tajawal', sans-serif; margin: 0; }
-        .app-container { display: flex; height: 100vh; }
-        .main-shell { flex: 1; display: flex; flex-direction: column; }
-        header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--neon-blue); }
-        .custom-login-btn { cursor:pointer; background: transparent; border: 1px solid var(--neon-blue); padding: 8px 16px; border-radius: 20px; color: var(--neon-blue); }
+        body { background: #02040a; color: #fff; font-family: sans-serif; margin: 0; }
+        .app-container { display: flex; flex-direction: column; height: 100vh; }
+        header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00d2ff; }
+        .custom-login-btn { cursor:pointer; background: transparent; border: 1px solid #00d2ff; padding: 8px 16px; border-radius: 20px; color: #00d2ff; }
         .user-profile { display: flex; align-items: center; gap: 10px; }
-        .user-avatar { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--neon-blue); }
+        .user-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #00d2ff; }
+        #chat-display { flex: 1; padding: 20px; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; }
+        .modal-content { background:#0a0e1a; border:1px solid #00d2ff; padding:20px; border-radius:15px; width:80%; max-width:300px; text-align:center; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <div class="main-shell">
-        <header>
-            <h1 style="color:var(--neon-blue); margin:0;">MIRAGE AI</h1>
-            <div id="auth-container"></div>
-        </header>
-        <div id="chat-display" style="flex:1;"></div>
+    <header>
+        <h1 style="color:#00d2ff; margin:0; font-size:20px;">MIRAGE AI</h1>
+        <div id="auth-container"></div>
+    </header>
+    <div id="chat-display"></div>
+    <div style="padding:20px;">
+        <button onclick="addReview()" class="custom-login-btn">إضافة تقييم</button>
+    </div>
+</div>
+
+<div id="review-modal" class="modal">
+    <div class="modal-content">
+        <h3 style="color:#00d2ff;">اكتب تقييمك</h3>
+        <textarea id="review-input" style="width:100%; height:60px; background:#151a28; color:white; border:1px solid #333; margin-bottom:10px;"></textarea>
+        <button onclick="submitReview()" style="width:100%; padding:10px; background:#00d2ff; border:none; border-radius:5px;">إرسال</button>
     </div>
 </div>
 
 <script>
-    // الإعدادات
-    const GOOGLE_CLIENT_ID = "86451093308-m5t74arb2v706v50qbls4pfoc4q4b0v1.apps.googleusercontent.com";
     const firebaseConfig = {
         apiKey: "AIzaSyAGlPJDsGdA6Y2BShTy3LJeguYfT5ahfgI",
         authDomain: "mirageai-1ff67.firebaseapp.com",
@@ -44,18 +49,15 @@
         messagingSenderId: "54774597616",
         appId: "1:54774597616:web:c084ed8283943d51b7bf35"
     };
-    
     firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
     let currentUser = JSON.parse(localStorage.getItem('mirage_user'));
 
-    // تهيئة جوجل
     window.onload = () => {
-        if (typeof google !== 'undefined') {
-            google.accounts.id.initialize({
-                client_id: GOOGLE_CLIENT_ID,
-                callback: handleCredentialResponse
-            });
-        }
+        google.accounts.id.initialize({
+            client_id: "86451093308-m5t74arb2v706v50qbls4pfoc4q4b0v1.apps.googleusercontent.com",
+            callback: handleCredentialResponse
+        });
         updateAuthUI();
     };
 
@@ -69,21 +71,20 @@
     function updateAuthUI() {
         const container = document.getElementById('auth-container');
         if (currentUser) {
-            container.innerHTML = `
-                <div class="user-profile">
-                    <img src="${currentUser.img}" class="user-avatar">
-                    <button onclick="handleLogout()" style="background:none; border:none; color:red; cursor:pointer;">خروج</button>
-                </div>`;
+            container.innerHTML = `<div class="user-profile"><img src="${currentUser.img}" class="user-avatar"><button onclick="logout()" style="background:none; border:none; color:red; cursor:pointer;">خروج</button></div>`;
         } else {
-            container.innerHTML = `
-                <button class="custom-login-btn" onclick="google.accounts.id.prompt()">تسجيل الدخول</button>`;
+            container.innerHTML = `<button class="custom-login-btn" onclick="google.accounts.id.prompt()">تسجيل الدخول</button>`;
         }
     }
 
-    function handleLogout() {
-        localStorage.removeItem('mirage_user');
-        currentUser = null;
-        updateAuthUI();
+    function logout() { localStorage.removeItem('mirage_user'); currentUser = null; updateAuthUI(); }
+    function addReview() { currentUser ? document.getElementById('review-modal').style.display = 'flex' : alert("سجل دخولك أولاً"); }
+    function submitReview() {
+        const text = document.getElementById('review-input').value;
+        if(text) {
+            db.collection("reviews").add({ text, user: currentUser.name, email: currentUser.email, timestamp: new Date() });
+            document.getElementById('review-modal').style.display = 'none';
+        }
     }
 </script>
 </body>
